@@ -37,7 +37,7 @@
     </PackageReference>
     <PackageReference Include="ConEmu.Control.WinForms" Version="1.21.9.5" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
-    <PackageReference Include="CliWrap" Version="3.9.0" />
+    <PackageReference Include="CliWrap" Version="3.10.1" />
     <PackageReference Include="Microsoft.PowerShell.EditorServices" Version="0.6.2.389" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
   </ItemGroup>
