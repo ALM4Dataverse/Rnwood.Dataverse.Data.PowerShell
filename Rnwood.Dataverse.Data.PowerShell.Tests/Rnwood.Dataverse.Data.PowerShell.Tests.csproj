@@ -38,7 +38,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="AwesomeAssertions" Version="7.2.1" />
-    <PackageReference Include="FakeItEasy" Version="6.2.1" />
+    <PackageReference Include="FakeItEasy" Version="9.0.1" />
   </ItemGroup>
   
   <!-- PowerShell runtime for test execution - enables Cmdlet.Invoke() and PSObject.Properties -->
