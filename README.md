@@ -95,6 +95,7 @@ For more advanced scenarios including metadata and customisations, see the [docu
 - [View Management](docs/core-concepts/view-management.md) - Create, update, and manage system and personal views
 - [App Module Management](docs/core-concepts/app-module-management.md) - Create, update, and manage model-driven apps
 - [Environment Variables and Connection References](docs/core-concepts/environment-variables-connection-references.md) - Managing configuration and connections
+- [URL Generation](docs/core-concepts/url-generation.md) - Generate URLs for records, maker portal, and admin center
 - [Plugin Management](docs/core-concepts/plugin-management.md) - Manage plugins including dynamic plugin assemblies (compile C# on-the-fly), traditional plugin assemblies, plugin steps, and images
 - [Solution Management](docs/core-concepts/solution-management.md) - Import, export, and manage solutions
 - [Solution Component Management](docs/core-concepts/solution-component-management.md) - Managing individual components within solutions
