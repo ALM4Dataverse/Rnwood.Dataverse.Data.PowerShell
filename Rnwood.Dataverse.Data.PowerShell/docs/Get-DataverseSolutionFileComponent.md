@@ -151,11 +151,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Byte[]
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 
 This cmdlet discovers components beyond those listed in the solution's RootComponents section:

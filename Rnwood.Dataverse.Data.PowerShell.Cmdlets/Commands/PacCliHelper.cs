@@ -4,6 +4,7 @@ using System.IO;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
 
 namespace Rnwood.Dataverse.Data.PowerShell.Commands
@@ -129,39 +130,56 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// Executes a PAC CLI command and returns the exit code.
         /// </summary>
         /// <param name="cmdlet">The cmdlet executing the command (for output).</param>
-        /// <param name="arguments">The arguments to pass to PAC CLI.</param>
+        /// <param name="argumentItems">The individual arguments to pass to PAC CLI.</param>
         /// <param name="workingDirectory">The working directory for the process.</param>
         /// <returns>The exit code from the PAC CLI process.</returns>
         [Obsolete("Use ExecutePacCliWithOutput instead to get detailed error output")]
-        public static int ExecutePacCli(PSCmdlet cmdlet, string arguments, string workingDirectory = null)
+        public static int ExecutePacCli(PSCmdlet cmdlet, string[] argumentItems, string workingDirectory = null)
         {
-            var result = ExecutePacCliWithOutput(cmdlet, arguments, workingDirectory);
+            var result = ExecutePacCliWithOutput(cmdlet, argumentItems, workingDirectory);
             return result.ExitCode;
         }
 
         /// <summary>
         /// Executes a PAC CLI command and returns the result with output.
+        /// Each item in <paramref name="argumentItems"/> is passed as a separate, properly-escaped
+        /// argument — no manual quoting of paths or values is needed.
         /// </summary>
         /// <param name="cmdlet">The cmdlet executing the command (for output).</param>
-        /// <param name="arguments">The arguments to pass to PAC CLI.</param>
+        /// <param name="argumentItems">The individual arguments to pass to PAC CLI.</param>
         /// <param name="workingDirectory">The working directory for the process.</param>
         /// <returns>A PacCliResult containing the exit code and collected output.</returns>
-        public static PacCliResult ExecutePacCliWithOutput(PSCmdlet cmdlet, string arguments, string workingDirectory = null)
+        public static PacCliResult ExecutePacCliWithOutput(PSCmdlet cmdlet, string[] argumentItems, string workingDirectory = null)
         {
             string pacPath = GetPacCliPath(cmdlet);
 
-            cmdlet.WriteVerbose($"Executing: {pacPath} {arguments}");
+            cmdlet.WriteVerbose($"Executing: {pacPath} {string.Join(" ", argumentItems)}");
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = pacPath,
-                Arguments = arguments,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
                 WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
             };
+
+#if NETFRAMEWORK
+            // On .NET Framework, ArgumentList is not available — build a properly-escaped string.
+            var escapedArgs = new System.Collections.Generic.List<string>();
+            foreach (string arg in argumentItems)
+            {
+                escapedArgs.Add(EscapeWindowsArgument(arg));
+            }
+            startInfo.Arguments = string.Join(" ", escapedArgs);
+#else
+            // On .NET 5+, use ArgumentList so the runtime handles all quoting/escaping correctly.
+            foreach (string arg in argumentItems)
+            {
+                startInfo.ArgumentList.Add(arg);
+            }
+#endif
 
             var verboseMessages = new ConcurrentQueue<string>();
             var warningMessages = new ConcurrentQueue<string>();
@@ -234,5 +252,55 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 };
             }
         }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Escapes a single argument for use in a Windows command-line string
+        /// (i.e. for <see cref="ProcessStartInfo.Arguments"/>).
+        /// Handles spaces, quotes, and trailing backslashes correctly.
+        /// </summary>
+        private static string EscapeWindowsArgument(string arg)
+        {
+            if (string.IsNullOrEmpty(arg))
+            {
+                return "\"\"";
+            }
+
+            // If the value contains no characters that need quoting, pass it through.
+            if (arg.IndexOfAny(new[] { ' ', '"', '\t', '\n', '\v' }) < 0)
+            {
+                return arg;
+            }
+
+            var sb = new StringBuilder("\"");
+            int backslashCount = 0;
+
+            foreach (char c in arg)
+            {
+                if (c == '\\')
+                {
+                    backslashCount++;
+                }
+                else if (c == '"')
+                {
+                    // Each backslash before a quote must be doubled, then add an escaped quote.
+                    sb.Append('\\', backslashCount * 2 + 1);
+                    sb.Append('"');
+                    backslashCount = 0;
+                }
+                else
+                {
+                    sb.Append('\\', backslashCount);
+                    sb.Append(c);
+                    backslashCount = 0;
+                }
+            }
+
+            // Trailing backslashes must be doubled before the closing quote.
+            sb.Append('\\', backslashCount * 2);
+            sb.Append('"');
+            return sb.ToString();
+        }
+#endif
     }
 }

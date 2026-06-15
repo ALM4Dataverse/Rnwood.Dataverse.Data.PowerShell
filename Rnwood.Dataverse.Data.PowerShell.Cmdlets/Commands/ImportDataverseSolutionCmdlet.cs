@@ -285,10 +285,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                         }
 
                         // Build PAC CLI arguments
-                        var args = $"solution pack --zipfile \"{tempZipPath}\" --folder \"{workingPath}\" --packagetype {PackageType}";
+                        var pacArgs = new[]
+                        {
+                            "solution", "pack",
+                            "--zipfile", tempZipPath,
+                            "--folder", workingPath,
+                            "--packagetype", PackageType.ToString()
+                        };
 
                         // Execute PAC CLI
-                        var result = PacCliHelper.ExecutePacCliWithOutput(this, args);
+                        var result = PacCliHelper.ExecutePacCliWithOutput(this, pacArgs);
 
                         if (result.ExitCode != 0)
                         {

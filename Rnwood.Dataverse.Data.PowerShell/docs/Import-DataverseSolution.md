@@ -510,36 +510,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SkipSolutionHistoryCheck
-Skip checking solution history for in-progress operations before checking existing solution state.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SolutionHistoryWaitSeconds
-Maximum time in seconds to wait for existing solution history operations to complete before checking solution state. Default is 30.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 30
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -SkipIfSameVersion
 Skip import if the solution version in the file is the same as the installed version in the target environment.
 
@@ -587,6 +557,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SkipSolutionHistoryCheck
+Skip checking solution history for in-progress operations before checking existing solution state.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -SolutionFile
 Solution file bytes to import.
 
@@ -599,6 +584,21 @@ Required: True
 Position: Named
 Default value: None
 Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -SolutionHistoryWaitSeconds
+Maximum time in seconds to wait for existing solution history operations to complete before checking solution state. Default is 30.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 30
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -668,7 +668,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Byte[]
-
 ## OUTPUTS
 
 ### System.Object

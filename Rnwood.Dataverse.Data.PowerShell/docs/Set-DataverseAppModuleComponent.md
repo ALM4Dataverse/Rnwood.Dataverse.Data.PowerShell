@@ -355,19 +355,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Guid
-
 ### System.String
-
 ### System.Nullable`1[[Rnwood.Dataverse.Data.PowerShell.Commands.Model.AppModuleComponentType, Rnwood.Dataverse.Data.PowerShell.Cmdlets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]
-
 ### System.Nullable`1[[Rnwood.Dataverse.Data.PowerShell.Commands.Model.RootComponentBehavior, Rnwood.Dataverse.Data.PowerShell.Cmdlets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]
-
-### System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]
-
+### System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]
 ## OUTPUTS
 
 ### System.Guid
-
 ## NOTES
 
 **Required Parameters for Creation:**

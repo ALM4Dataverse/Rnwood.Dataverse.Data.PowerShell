@@ -199,21 +199,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SolutionName
-The unique name of the solution to upgrade (e.g., 'MySolution'). The holding solution must exist with the name 'MySolution_Upgrade'.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -SkipSolutionHistoryCheck
 Skip checking solution history for in-progress operations before checking existing solution state.
 
@@ -240,6 +225,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: 30
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SolutionName
+The unique name of the solution to upgrade (e.g., 'MySolution'). The holding solution must exist with the name 'MySolution_Upgrade'.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -295,7 +295,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

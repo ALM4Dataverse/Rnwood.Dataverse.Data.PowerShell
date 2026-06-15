@@ -474,11 +474,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Byte[]
-
 ## NOTES
 
 This cmdlet uses the ExportSolutionAsyncRequest API which exports the solution in the background. The cmdlet monitors the async operation and downloads the solution file when complete.
