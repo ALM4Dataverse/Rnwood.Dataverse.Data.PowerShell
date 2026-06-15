@@ -69,10 +69,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             WriteVerbose($"Unpacking solution from '{resolvedPath}' to '{resolvedOutputPath}'");
 
             // Build PAC CLI arguments (always use clobber and allowDelete)
-            var args = $"solution unpack --zipfile \"{resolvedPath}\" --folder \"{resolvedOutputPath}\" --packagetype {PackageType} --clobber --allowDelete";
+            var pacArgs = new[]
+            {
+                "solution", "unpack",
+                "--zipfile", resolvedPath,
+                "--folder", resolvedOutputPath,
+                "--packagetype", PackageType.ToString(),
+                "--clobber",
+                "--allowDelete"
+            };
 
             // Execute PAC CLI
-            var result = PacCliHelper.ExecutePacCliWithOutput(this, args);
+            var result = PacCliHelper.ExecutePacCliWithOutput(this, pacArgs);
 
             if (result.ExitCode != 0)
             {

@@ -183,11 +183,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Void
-
 ## NOTES
 
 **Important**: This cmdlet requires a .NET Framework 4.8 host process to run XrmToolbox plugins, as they are built for .NET Framework. The host process is automatically launched when you invoke a plugin.
