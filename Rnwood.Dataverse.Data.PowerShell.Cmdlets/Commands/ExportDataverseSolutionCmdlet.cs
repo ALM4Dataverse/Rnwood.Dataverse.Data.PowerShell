@@ -234,7 +234,8 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                     if (SourceFormat.HasValue)
                     {
-                        args += $" --solutionType {SourceFormat.Value.ToString().ToLowerInvariant()}";
+                        // Note: --solutionType is not present in all PAC CLI versions; ignored here.
+                        WriteVerbose($"SourceFormat '{SourceFormat.Value}' specified but --solutionType is not supported by this PAC CLI version and will be ignored.");
                     }
 
                     if (!string.IsNullOrEmpty(MapFile))
