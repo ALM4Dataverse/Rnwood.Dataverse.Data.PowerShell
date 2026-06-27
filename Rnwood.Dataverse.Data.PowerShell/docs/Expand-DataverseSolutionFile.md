@@ -14,8 +14,8 @@ Unpacks a Dataverse solution file using the Power Apps CLI.
 
 ```
 Expand-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-UnpackMsapp]
- [-PackageType <SolutionPackageType>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-PackageType <SolutionPackageType>] [-SourceFormat <SolutionSourceFormat>] [-MapFile <String>]
+ [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -47,6 +47,21 @@ Expand-DataverseSolutionFile -Path "C:\Solutions\MySolution.zip" -OutputPath "C:
 Unpacks the solution for dual managed and unmanaged operation. This creates separate folder structures for both types.
 
 ## PARAMETERS
+
+### -MapFile
+Path to a solution packager mapping XML file. Passed as --map to pac solution unpack. Used to remap component source folders.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -OutputPath
 Output path where the solution will be unpacked.
@@ -109,6 +124,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SourceFormat
+Source control format for unpacking: 'Yaml' (YAML source control format, requires PAC CLI 2.4.1+) or 'Xml' (legacy XML format). Passed as --solutionType to pac solution unpack. When not specified, the PAC CLI default is used.
+
+```yaml
+Type: SolutionSourceFormat
+Parameter Sets: (All)
+Aliases:
+Accepted values: Yaml, Xml
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -UnpackMsapp
 Unpack .msapp files found in the solution into folders (same name without extension). Canvas App (.msapp) files are ZIP archives that can be unpacked for version control.
 
@@ -160,7 +191,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

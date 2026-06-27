@@ -35,6 +35,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public SolutionPackageType PackageType { get; set; } = SolutionPackageType.Unmanaged;
 
         /// <summary>
+        /// Gets or sets an optional path to a solution packager mapping file.
+        /// </summary>
+        [Parameter(HelpMessage = "Path to a solution packager mapping XML file. Passed as --map to pac solution pack.")]
+        public string MapFile { get; set; }
+
+        /// <summary>
         /// Processes the cmdlet request.
         /// </summary>
         protected override void ProcessRecord()
@@ -86,6 +92,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                 // Build PAC CLI arguments
                 var args = $"solution pack --zipfile \"{resolvedOutputPath}\" --folder \"{workingPath}\" --packagetype {PackageType}";
+
+                if (!string.IsNullOrEmpty(MapFile))
+                {
+                    var resolvedMapFile = GetUnresolvedProviderPathFromPSPath(MapFile);
+                    args += $" --map \"{resolvedMapFile}\"";
+                }
 
                 // Execute PAC CLI
                 var result = PacCliHelper.ExecutePacCliWithOutput(this, args);

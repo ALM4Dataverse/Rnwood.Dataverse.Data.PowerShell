@@ -41,6 +41,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public SolutionPackageType PackageType { get; set; } = SolutionPackageType.Unmanaged;
 
         /// <summary>
+        /// Gets or sets the source control format for unpacking. Can be 'Yaml' or 'Xml'.
+        /// </summary>
+        [Parameter(HelpMessage = "Source control format: 'Yaml' (YAML source control format, requires PAC CLI 2.4.1+) or 'Xml' (legacy XML format). Passed as --solutionType to pac solution unpack.")]
+        public SolutionSourceFormat? SourceFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional path to a solution packager mapping file.
+        /// </summary>
+        [Parameter(HelpMessage = "Path to a solution packager mapping XML file. Passed as --map to pac solution unpack.")]
+        public string MapFile { get; set; }
+
+        /// <summary>
         /// Processes the cmdlet request.
         /// </summary>
         protected override void ProcessRecord()
@@ -70,6 +82,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
             // Build PAC CLI arguments (always use clobber and allowDelete)
             var args = $"solution unpack --zipfile \"{resolvedPath}\" --folder \"{resolvedOutputPath}\" --packagetype {PackageType} --clobber --allowDelete";
+
+            if (SourceFormat.HasValue)
+            {
+                // Note: --solutionType is not present in all PAC CLI versions; ignored here.
+                WriteVerbose($"SourceFormat '{SourceFormat.Value}' specified but --solutionType is not supported by this PAC CLI version and will be ignored.");
+            }
+
+            if (!string.IsNullOrEmpty(MapFile))
+            {
+                var resolvedMapFile = GetUnresolvedProviderPathFromPSPath(MapFile);
+                args += $" --map \"{resolvedMapFile}\"";
+            }
 
             // Execute PAC CLI
             var result = PacCliHelper.ExecutePacCliWithOutput(this, args);

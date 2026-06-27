@@ -14,7 +14,7 @@ Packs a Dataverse solution folder using the Power Apps CLI.
 
 ```
 Compress-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-PackageType <SolutionPackageType>]
- [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-MapFile <String>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,6 +39,21 @@ Compress-DataverseSolutionFile -Path "C:\Solutions\MySolution_Src" -OutputPath "
 Packs a managed solution from a folder that was previously unpacked with `-PackageType Both`. Any folders with `.msapp` extension are automatically zipped into .msapp files before packing.
 
 ## PARAMETERS
+
+### -MapFile
+Path to a solution packager mapping XML file. Passed as --map to pac solution pack. Used to remap component source folders.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -OutputPath
 Output path for the packed solution file (.zip).
@@ -137,7 +152,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object
