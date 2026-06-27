@@ -29,7 +29,8 @@ Export-DataverseSolution [-SolutionName] <String> [-TargetVersion <String>] [-Ex
  [-ExportCalendarSettings] [-ExportCustomizationSettings] [-ExportEmailTrackingSettings]
  [-ExportGeneralSettings] [-ExportMarketingSettings] [-ExportOutlookSynchronizationSettings]
  [-ExportRelationshipRoles] [-ExportIsvConfig] [-ExportSales] [-ExportExternalApplications] -OutFolder <String>
- [-UnpackMsApp] [-PackageType <SolutionPackageType>] [-PollingIntervalSeconds <Int32>]
+ [-UnpackMsApp] [-PackageType <SolutionPackageType>] [-SourceFormat <SolutionSourceFormat>]
+ [-MapFile <String>] [-PollingIntervalSeconds <Int32>]
  [-TimeoutSeconds <Int32>] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
@@ -428,6 +429,37 @@ Unpack .msapp files found in the solution into folders.
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: ToFolder
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SourceFormat
+Source control format for unpacking: 'Yaml' (YAML source control format, requires PAC CLI 2.4.1+) or 'Xml' (legacy XML format). Passed as --solutionType to pac solution unpack. When not specified, the PAC CLI default is used.
+
+```yaml
+Type: SolutionSourceFormat
+Parameter Sets: ToFolder
+Aliases:
+Accepted values: Yaml, Xml
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MapFile
+Path to a solution packager mapping XML file. Passed as --map to pac solution unpack. Used to remap component source folders.
+
+```yaml
+Type: String
 Parameter Sets: ToFolder
 Aliases:
 

@@ -14,7 +14,7 @@ Packs a Dataverse solution folder using the Power Apps CLI.
 
 ```
 Compress-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-PackageType <SolutionPackageType>]
- [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-MapFile <String>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -67,6 +67,21 @@ Accepted values: Unmanaged, Managed, Both
 Required: False
 Position: Named
 Default value: Unmanaged
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MapFile
+Path to a solution packager mapping XML file. Passed as --map to pac solution pack. Used to remap component source folders.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

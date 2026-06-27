@@ -129,6 +129,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public SolutionPackageType PackageType { get; set; } = SolutionPackageType.Both;
 
         /// <summary>
+        /// Gets or sets the source control format for unpacking when using OutFolder. Can be 'Yaml' or 'Xml'.
+        /// </summary>
+        [Parameter(ParameterSetName = "ToFolder", HelpMessage = "Source control format: 'Yaml' (YAML source control format, requires PAC CLI 2.4.1+) or 'Xml' (legacy XML format). Passed as --solutionType to pac solution unpack.")]
+        public SolutionSourceFormat? SourceFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional path to a solution packager mapping file when using OutFolder.
+        /// </summary>
+        [Parameter(ParameterSetName = "ToFolder", HelpMessage = "Path to a solution packager mapping XML file. Passed as --map to pac solution unpack.")]
+        public string MapFile { get; set; }
+
+        /// <summary>
         /// Gets or sets whether to output the solution file bytes to the pipeline.
         /// </summary>
         [Parameter(ParameterSetName = "ToFile", HelpMessage = "Output the solution file bytes to the pipeline.")]
@@ -219,6 +231,17 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                     // Build PAC CLI arguments (always use clobber and allowDelete)
                     var args = $"solution unpack --zipfile \"{zipFilePath}\" --folder \"{resolvedOutputPath}\" --packagetype {PackageType} --clobber --allowDelete";
+
+                    if (SourceFormat.HasValue)
+                    {
+                        args += $" --solutionType {SourceFormat.Value.ToString().ToLowerInvariant()}";
+                    }
+
+                    if (!string.IsNullOrEmpty(MapFile))
+                    {
+                        var resolvedMapFile = GetUnresolvedProviderPathFromPSPath(MapFile);
+                        args += $" --map \"{resolvedMapFile}\"";
+                    }
 
                     // Execute PAC CLI
                     var result = PacCliHelper.ExecutePacCliWithOutput(this, args);
