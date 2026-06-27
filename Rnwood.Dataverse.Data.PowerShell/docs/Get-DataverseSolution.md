@@ -219,11 +219,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### Rnwood.Dataverse.Data.PowerShell.SolutionInfo
-
 ## NOTES
 
 This cmdlet requires an active connection to a Dataverse environment.

@@ -132,11 +132,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Byte[]
-
 ## OUTPUTS
 
 ### Rnwood.Dataverse.Data.PowerShell.SolutionInfo
-
 ## NOTES
 
 This cmdlet does not require a connection to Dataverse as it only parses the local solution file.

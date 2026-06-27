@@ -40,6 +40,21 @@ Packs a managed solution from a folder that was previously unpacked with `-Packa
 
 ## PARAMETERS
 
+### -MapFile
+Path to a solution packager mapping XML file. Passed as --map to pac solution pack. Used to remap component source folders.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -OutputPath
 Output path for the packed solution file (.zip).
 
@@ -67,21 +82,6 @@ Accepted values: Unmanaged, Managed, Both
 Required: False
 Position: Named
 Default value: Unmanaged
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MapFile
-Path to a solution packager mapping XML file. Passed as --map to pac solution pack. Used to remap component source folders.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -152,7 +152,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

@@ -192,11 +192,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Guid
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - The web resource must exist in the environment (published or unpublished) before adding it to a form.
 - If the library already exists on the form, it will be updated with the new unique ID if provided.
