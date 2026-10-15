@@ -5,6 +5,7 @@ using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Threading;
+using Rnwood.Dataverse.Data.PowerShell.Commands.Model;
 
 namespace Rnwood.Dataverse.Data.PowerShell.Commands
 {
@@ -28,6 +29,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             /// </summary>
             public string Output { get; set; }
         }
+
+        internal static string BuildSolutionUnpackArguments(string zipPath, string folderPath, SolutionPackageType packageType, string mappingFile)
+        {
+            var arguments = $"solution unpack --zipfile \"{zipPath}\" --folder \"{folderPath}\" --packagetype {packageType} --clobber --allowDelete";
+            if (!string.IsNullOrEmpty(mappingFile))
+            {
+                arguments += $" --map \"{mappingFile}\"";
+            }
+
+            return arguments;
+        }
+
         /// <summary>
         /// Gets the path to the PAC CLI executable from PATH.
         /// </summary>

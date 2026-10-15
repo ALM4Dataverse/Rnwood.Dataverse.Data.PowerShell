@@ -29,7 +29,7 @@ Export-DataverseSolution [-SolutionName] <String> [-TargetVersion <String>] [-Ex
  [-ExportCalendarSettings] [-ExportCustomizationSettings] [-ExportEmailTrackingSettings]
  [-ExportGeneralSettings] [-ExportMarketingSettings] [-ExportOutlookSynchronizationSettings]
  [-ExportRelationshipRoles] [-ExportIsvConfig] [-ExportSales] [-ExportExternalApplications] -OutFolder <String>
- [-UnpackMsApp] [-PackageType <SolutionPackageType>] [-PollingIntervalSeconds <Int32>]
+ [-MappingFile <String>] [-UnpackMsApp] [-PackageType <SolutionPackageType>] [-PollingIntervalSeconds <Int32>]
  [-TimeoutSeconds <Int32>] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
@@ -46,6 +46,7 @@ The cmdlet:
 5. Optionally saves the solution to a file or outputs the bytes to the pipeline
 
 This is particularly useful for exporting large solutions where the synchronous export would time out.
+When using `-OutFolder`, `-MappingFile` applies SolutionPackager mappings while unpacking the exported solution.
 
 ## EXAMPLES
 
@@ -311,6 +312,21 @@ Parameter Sets: ToFolder
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MappingFile
+Mapping XML file used to resolve component file paths while unpacking.
+
+```yaml
+Type: String
+Parameter Sets: ToFolder
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
