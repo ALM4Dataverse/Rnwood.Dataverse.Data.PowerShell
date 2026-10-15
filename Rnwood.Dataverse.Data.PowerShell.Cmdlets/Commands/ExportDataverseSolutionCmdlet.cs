@@ -117,6 +117,13 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public string OutFolder { get; set; }
 
         /// <summary>
+        /// Gets or sets the mapping XML file used to resolve component file paths while unpacking.
+        /// </summary>
+        [Parameter(ParameterSetName = "ToFolder", HelpMessage = "Mapping XML file used to resolve component file paths while unpacking.")]
+        [ValidateNotNullOrEmpty]
+        public string MappingFile { get; set; }
+
+        /// <summary>
         /// Gets or sets whether to unpack .msapp files when using OutFolder.
         /// </summary>
         [Parameter(ParameterSetName = "ToFolder", HelpMessage = "Unpack .msapp files found in the solution into folders.")]
@@ -180,6 +187,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             }
             else if (ParameterSetName == "ToFolder")
             {
+                string resolvedMappingFile = string.IsNullOrEmpty(MappingFile)
+                    ? null
+                    : GetUnresolvedProviderPathFromPSPath(MappingFile);
+                if (resolvedMappingFile != null && !File.Exists(resolvedMappingFile))
+                {
+                    ThrowTerminatingError(new ErrorRecord(
+                        new FileNotFoundException($"Mapping file not found: {resolvedMappingFile}", resolvedMappingFile),
+                        "MappingFileNotFound",
+                        ErrorCategory.ObjectNotFound,
+                        resolvedMappingFile));
+                    return;
+                }
+
                 string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(tempDir);
 
@@ -218,7 +238,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     WriteVerbose($"Unpacking solution to '{resolvedOutputPath}'");
 
                     // Build PAC CLI arguments (always use clobber and allowDelete)
-                    var args = $"solution unpack --zipfile \"{zipFilePath}\" --folder \"{resolvedOutputPath}\" --packagetype {PackageType} --clobber --allowDelete";
+                    var args = PacCliHelper.BuildSolutionUnpackArguments(zipFilePath, resolvedOutputPath, PackageType, resolvedMappingFile);
 
                     // Execute PAC CLI
                     var result = PacCliHelper.ExecutePacCliWithOutput(this, args);
