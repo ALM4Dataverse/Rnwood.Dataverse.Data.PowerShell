@@ -1,5 +1,5 @@
 using Rnwood.Dataverse.Data.PowerShell.Commands;
-using Rnwood.Dataverse.Data.PowerShell.Cmdlets.Commands.Model;
+using Rnwood.Dataverse.Data.PowerShell.Commands.Model;
 using Xunit;
 
 namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets;
