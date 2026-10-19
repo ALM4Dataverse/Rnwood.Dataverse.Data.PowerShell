@@ -543,7 +543,7 @@ jobs:
       
       # Publish xUnit test results to GitHub
       - name: Publish Infrastructure Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: ${{ always() && steps.run-tests.outputs.infra_tests_executed == 'true' }}
         with:
           name: Infrastructure Tests (${{ matrix.test_set }}, ${{ matrix.os }}, PS ${{ matrix.powershell_version }})
@@ -553,7 +553,7 @@ jobs:
       
       # Publish E2E test results to GitHub
       - name: Publish E2E Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: ${{ always() && steps.run-tests.outputs.e2e_tests_executed == 'true' }}
         with:
           name: E2E Tests (${{ matrix.test_set }}, ${{ matrix.os }}, PS ${{ matrix.powershell_version }})
