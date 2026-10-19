@@ -1,6 +1,6 @@
 using Rnwood.Dataverse.Data.PowerShell.E2ETests.Infrastructure;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Rnwood.Dataverse.Data.PowerShell.E2ETests.Forms

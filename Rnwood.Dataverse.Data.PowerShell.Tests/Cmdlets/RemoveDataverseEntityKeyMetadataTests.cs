@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;

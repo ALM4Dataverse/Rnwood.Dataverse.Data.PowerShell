@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Runtime.Serialization;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Xrm.Sdk.Metadata;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;
