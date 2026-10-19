@@ -77,7 +77,6 @@ This example compares the MySolution solution file with the state of the solutio
 
 ### Example 2: Compare two solution files
 ```powershell
-PS C:\> Get-DataverseConnection -Url https://myorg.crm.dynamics.com -Interactive -SetAsDefault
 PS C:\> Compare-DataverseSolutionComponents -SolutionFile "C:\Solutions\MySolution_v1.zip" -TargetSolutionFile "C:\Solutions\MySolution_v2.zip"
 ```
 
@@ -143,7 +142,6 @@ Returns $true if additive, $false otherwise. Full comparison results are output 
 
 ### Example 9: Test if changes are additive (file to file)
 ```powershell
-PS C:\> Get-DataverseConnection -Url https://myorg.crm.dynamics.com -Interactive -SetAsDefault
 PS C:\> $isAdditive = Compare-DataverseSolutionComponents -SolutionFile "C:\Solutions\MySolution_v1.zip" -TargetSolutionFile "C:\Solutions\MySolution_v2.zip" -FileToFile -TestIfAdditive -Verbose
 PS C:\> if ($isAdditive) { Write-Host "Update can use simple import mode" } else { Write-Host "Update requires stage and upgrade" }
 ```
