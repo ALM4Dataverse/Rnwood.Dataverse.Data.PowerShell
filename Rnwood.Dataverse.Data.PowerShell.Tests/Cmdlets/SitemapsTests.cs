@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;

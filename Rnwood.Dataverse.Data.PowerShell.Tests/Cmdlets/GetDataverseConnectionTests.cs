@@ -4,7 +4,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
@@ -278,7 +278,7 @@ public class GetDataverseConnectionTests : TestBase, IDisposable
             var connections = store.ListConnections();
             connections.Should().Contain(conn1Name);
             connections.Should().Contain(conn2Name);
-            connections.Count.Should().BeGreaterOrEqualTo(2);
+            connections.Count.Should().BeGreaterThanOrEqualTo(2);
         }
         finally
         {
