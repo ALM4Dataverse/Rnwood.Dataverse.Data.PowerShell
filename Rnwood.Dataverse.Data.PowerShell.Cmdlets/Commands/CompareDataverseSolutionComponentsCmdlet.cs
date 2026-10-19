@@ -21,6 +21,20 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
     public class CompareDataverseSolutionComponentsCmdlet : OrganizationServiceCmdlet
     {
         /// <summary>
+        /// Resolves a default connection only for comparisons that query Dataverse.
+        /// File-to-file comparisons operate entirely on the supplied solution files.
+        /// </summary>
+        protected override void BeginProcessing()
+        {
+            if (ParameterSetName == "FileToFile" || ParameterSetName == "BytesToFile")
+            {
+                return;
+            }
+
+            base.BeginProcessing();
+        }
+
+        /// <summary>
         /// Gets or sets the Dataverse connection.
         /// </summary>
         [Parameter(Mandatory = false, ParameterSetName = "FileToEnvironment", HelpMessage = "Dataverse connection for comparing with environment.")]
