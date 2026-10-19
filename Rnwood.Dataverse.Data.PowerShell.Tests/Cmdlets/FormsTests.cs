@@ -133,7 +133,7 @@ public class FormsTests : TestBase
 
     private new PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         
         // Register form-related cmdlets
         initialSessionState.Commands.Add(new SessionStateCmdletEntry("Get-DataverseForm", typeof(GetDataverseFormCmdlet), null));

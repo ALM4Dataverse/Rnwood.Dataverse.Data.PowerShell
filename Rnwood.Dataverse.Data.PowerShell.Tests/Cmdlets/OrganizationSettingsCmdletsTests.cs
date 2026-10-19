@@ -17,7 +17,7 @@ public class OrganizationSettingsCmdletsTests : TestBase
 {
     private PS CreatePowerShellWithOrganizationSettingsCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseOrganizationSettings", typeof(GetDataverseOrganizationSettingsCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

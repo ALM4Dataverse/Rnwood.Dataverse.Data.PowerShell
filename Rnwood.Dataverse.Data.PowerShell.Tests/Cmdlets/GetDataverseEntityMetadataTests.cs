@@ -35,7 +35,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_SingleEntity_ReturnsMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -73,7 +73,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_ExcludeAttributes_ExcludesAttributeMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -108,7 +108,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_DefaultConnection_UsesDefaultConnection()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -147,7 +147,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_AllEntities_ReturnsAllEntities()
         {
             // Arrange - TestBase's interceptor handles RetrieveAllEntitiesRequest
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -174,7 +174,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_AllEntitiesExcludeAttributes_ReturnsAllEntitiesWithoutAttributes()
         {
             // Arrange - TestBase's interceptor handles RetrieveAllEntitiesRequest
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -204,7 +204,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_DefaultBehavior_RetrievesUnpublishedMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -235,7 +235,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_PublishedFlag_RetrievesPublishedMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -267,7 +267,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_PublishedWithExcludeAttributes_RetrievesPublishedMetadataWithoutAttributes()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -302,7 +302,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_ListRetrieval_ReturnsAllEntitiesList()
         {
             // Arrange - TestBase's interceptor handles RetrieveAllEntitiesRequest
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -329,7 +329,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_DetailedInformation_ReturnsDetailedMetadata()
         {
             // Arrange - TestBase's interceptor handles RetrieveAllEntitiesRequest
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -359,7 +359,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_FilterCustomEntities_ReturnsOnlyCustomEntities()
         {
             // Arrange - TestBase's interceptor handles RetrieveAllEntitiesRequest
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 
@@ -386,7 +386,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityMetadata_ListWithDefaultConnection_UsesDefaultConnection()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityMetadata", typeof(Commands.GetDataverseEntityMetadataCmdlet), null));
 

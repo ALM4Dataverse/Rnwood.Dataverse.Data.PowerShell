@@ -22,7 +22,7 @@ public class ViewsTests : TestBase
 {
     private PS CreatePowerShellWithViewCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseView", typeof(GetDataverseViewCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

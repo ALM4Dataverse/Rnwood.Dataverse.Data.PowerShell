@@ -29,7 +29,7 @@ public class GetDataverseWhoAmITests : TestBase, IDisposable
 
     private static PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseWhoAmI", typeof(GetDataverseWhoAmICmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

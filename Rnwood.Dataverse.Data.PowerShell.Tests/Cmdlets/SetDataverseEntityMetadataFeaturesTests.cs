@@ -21,7 +21,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityMetadata_HasActivitiesTrue_DetectsChanges()
         {
             // Arrange - TestBase has UpdateEntityRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -71,7 +71,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityMetadata_HasNotesTrue_DetectsChanges()
         {
             // Arrange - TestBase has UpdateEntityRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -121,7 +121,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityMetadata_BothHasActivitiesAndHasNotes_DetectsChanges()
         {
             // Arrange - TestBase has UpdateEntityRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 

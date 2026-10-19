@@ -422,7 +422,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
         /// <returns>A PowerShell instance ready for cmdlet invocation. Caller must dispose.</returns>
         protected static System.Management.Automation.PowerShell CreatePowerShellWithCmdlets()
         {
-            var initialSessionState = System.Management.Automation.Runspaces.InitialSessionState.CreateDefault();
+            var initialSessionState = System.Management.Automation.Runspaces.InitialSessionState.CreateDefault2();
             
             // Register all cmdlets from the Commands assembly
             var cmdletTypes = typeof(Commands.GetDataverseConnectionCmdlet).Assembly

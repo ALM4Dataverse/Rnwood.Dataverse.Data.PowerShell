@@ -27,7 +27,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateSimpleTextAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -61,7 +61,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateEmailAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -100,7 +100,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateMemoAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -141,7 +141,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateIntegerAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -181,7 +181,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateDecimalAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -221,7 +221,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateMoneyAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -263,7 +263,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateDateOnlyAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -304,7 +304,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateBooleanAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -346,7 +346,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreateSimpleLookupAttribute_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -387,7 +387,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_UpdateDisplayName_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -423,7 +423,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_UpdateRequiredLevel_ExecutesWithoutError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -461,7 +461,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_WhatIfDoesNotModifyData()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -499,7 +499,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_CreatePicklistWithStateProperty_CreatesStatusOptionMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
