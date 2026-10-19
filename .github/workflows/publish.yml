@@ -78,8 +78,8 @@ jobs:
             
             # Generate release notes for stable release (compare to last stable release)
             Write-Host "Generating release notes for stable release..."
-            $allTags = git tag --list --sort=-version:refname 2>$null
-            $stableReleases = $allTags | Where-Object { $_ -notmatch '-' } | Select-Object -First 2
+            $allTags = git tag --list 2>$null
+            $stableReleases = @(& ./scripts/Get-StableReleaseTags.ps1 -Tags $allTags | Select-Object -First 2)
             
             if ($stableReleases.Count -ge 2) {
               $previousRelease = $stableReleases[1]
@@ -98,11 +98,11 @@ jobs:
           } elseif ($env:GITHUB_REF -eq "refs/heads/main" -or $env:GITHUB_EVENT_NAME -eq "pull_request") {
             # CI build on main branch or PR - auto-determine version using conventional commits
             
-            # Get all tags sorted by version
-            $allTags = git tag --list --sort=-version:refname 2>$null
+            # Get all tags
+            $allTags = git tag --list 2>$null
             
             # Find the latest stable release (no prerelease suffix)
-            $latestStableTag = $allTags | Where-Object { $_ -notmatch '-' } | Select-Object -First 1
+            $latestStableTag = & ./scripts/Get-StableReleaseTags.ps1 -Tags $allTags | Select-Object -First 1
             if (-not $latestStableTag) {
               $latestStableTag = "0.0.0"
             }
