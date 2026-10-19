@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using System.IO;

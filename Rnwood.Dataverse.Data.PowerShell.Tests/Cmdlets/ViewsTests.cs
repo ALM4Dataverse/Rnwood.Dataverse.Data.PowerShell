@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
@@ -234,7 +234,7 @@ public class ViewsTests : TestBase
         results.Should().HaveCount(1);
         var columns = results[0].Properties["Columns"].Value as object[];
         columns.Should().NotBeNull();
-        columns.Should().HaveCountGreaterOrEqualTo(2);
+        columns.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 
     [Fact]
