@@ -38,7 +38,7 @@ public class SitemapsTests : TestBase
 
     private PS CreatePowerShellWithSitemapCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseSitemap", typeof(GetDataverseSitemapCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

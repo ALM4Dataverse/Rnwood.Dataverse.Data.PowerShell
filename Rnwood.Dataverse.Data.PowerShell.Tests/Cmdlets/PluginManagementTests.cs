@@ -23,7 +23,7 @@ public class PluginManagementTests : TestBase
 {
     private PS CreatePowerShellWithPluginCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataversePluginAssembly", typeof(GetDataversePluginAssemblyCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

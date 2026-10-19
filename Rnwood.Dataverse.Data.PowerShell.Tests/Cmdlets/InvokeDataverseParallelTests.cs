@@ -20,7 +20,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseParallel_ProcessesInputObjectsInParallelChunks_ReturnsAllResults()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseParallel", typeof(InvokeDataverseParallelCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
@@ -77,7 +77,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseParallel_ClonedConnectionAvailableInScriptBlock_ProcessesSuccessfully()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseParallel", typeof(InvokeDataverseParallelCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
@@ -121,7 +121,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseParallel_RespectsChunkSizeParameter_ProcessesInCorrectBatches()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseParallel", typeof(InvokeDataverseParallelCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
@@ -165,7 +165,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseParallel_EmptyInput_HandlesGracefully()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseParallel", typeof(InvokeDataverseParallelCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
@@ -196,7 +196,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseParallel_SingleItemInput_ProcessesSuccessfully()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseParallel", typeof(InvokeDataverseParallelCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(

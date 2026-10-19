@@ -23,7 +23,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityMetadata_WhatIfWithPublish_DoesNotPublish()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -56,7 +56,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseAttributeMetadata_WhatIfWithPublish_DoesNotPublish()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -119,7 +119,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact", "account");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseRelationshipMetadata", typeof(Commands.SetDataverseRelationshipMetadataCmdlet), null));
 
@@ -164,7 +164,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -211,7 +211,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -255,7 +255,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -295,7 +295,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityMetadata", typeof(Commands.SetDataverseEntityMetadataCmdlet), null));
 
@@ -347,7 +347,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseAttributeMetadata", typeof(Commands.SetDataverseAttributeMetadataCmdlet), null));
 
@@ -423,7 +423,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
                 return null;
             }, "contact", "account");
 
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseRelationshipMetadata", typeof(Commands.SetDataverseRelationshipMetadataCmdlet), null));
 

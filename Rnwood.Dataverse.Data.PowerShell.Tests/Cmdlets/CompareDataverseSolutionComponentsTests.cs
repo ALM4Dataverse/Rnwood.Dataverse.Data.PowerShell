@@ -16,7 +16,7 @@ public class CompareDataverseSolutionComponentsTests : TestBase
 {
     private static PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Compare-DataverseSolutionComponents",
             typeof(CompareDataverseSolutionComponentsCmdlet),

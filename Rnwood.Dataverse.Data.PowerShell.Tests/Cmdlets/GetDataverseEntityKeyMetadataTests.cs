@@ -21,7 +21,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_EntityNameParameter_Accepted()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -47,7 +47,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_KeyNameParameter_ThrowsIfNotFound()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -94,7 +94,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_CreatesRequestWithCorrectEntityName()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -121,7 +121,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_UsesRetrieveAsIfPublishedTrueByDefault()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -148,7 +148,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_UsesRetrieveAsIfPublishedFalseWithPublished()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -178,7 +178,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseEntityKeyMetadata_ThrowsWhenKeyNameNotFound()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseEntityKeyMetadata", typeof(Commands.GetDataverseEntityKeyMetadataCmdlet), null));
 
