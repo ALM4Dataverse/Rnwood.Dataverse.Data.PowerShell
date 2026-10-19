@@ -7,7 +7,7 @@ using System.Management.Automation.Runspaces;
 using System.Reflection;
 using System.Text;
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;

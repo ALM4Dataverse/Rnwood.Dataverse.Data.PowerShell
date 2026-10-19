@@ -4,7 +4,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
 using System.Text;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;

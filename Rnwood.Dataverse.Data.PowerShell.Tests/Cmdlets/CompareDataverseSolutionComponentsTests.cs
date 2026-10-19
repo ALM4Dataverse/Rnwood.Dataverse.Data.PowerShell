@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
-using FluentAssertions;
+using AwesomeAssertions;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;

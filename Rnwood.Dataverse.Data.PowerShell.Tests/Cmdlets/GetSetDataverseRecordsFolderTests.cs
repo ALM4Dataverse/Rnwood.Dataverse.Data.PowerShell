@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using FluentAssertions;
+using AwesomeAssertions;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 
 namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets;
