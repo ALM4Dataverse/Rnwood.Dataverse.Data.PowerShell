@@ -65,7 +65,7 @@
       <IncludeAssets>none</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.78.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.84.1" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
