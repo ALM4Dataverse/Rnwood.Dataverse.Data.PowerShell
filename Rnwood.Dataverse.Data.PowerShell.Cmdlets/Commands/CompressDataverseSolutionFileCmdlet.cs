@@ -35,6 +35,13 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public SolutionPackageType PackageType { get; set; } = SolutionPackageType.Unmanaged;
 
         /// <summary>
+        /// Gets or sets the mapping XML file used to resolve component file paths.
+        /// </summary>
+        [Parameter(HelpMessage = "Mapping XML file used to resolve component file paths.")]
+        [ValidateNotNullOrEmpty]
+        public string MappingFile { get; set; }
+
+        /// <summary>
         /// Processes the cmdlet request.
         /// </summary>
         protected override void ProcessRecord()
@@ -44,6 +51,9 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             // Resolve paths
             string resolvedPath = GetUnresolvedProviderPathFromPSPath(Path);
             string resolvedOutputPath = GetUnresolvedProviderPathFromPSPath(OutputPath);
+            string resolvedMappingFile = string.IsNullOrEmpty(MappingFile)
+                ? null
+                : GetUnresolvedProviderPathFromPSPath(MappingFile);
 
             if (!Directory.Exists(resolvedPath))
             {
@@ -52,6 +62,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     "FolderNotFound",
                     ErrorCategory.ObjectNotFound,
                     resolvedPath));
+                return;
+            }
+
+            if (resolvedMappingFile != null && !File.Exists(resolvedMappingFile))
+            {
+                ThrowTerminatingError(new ErrorRecord(
+                    new FileNotFoundException($"Mapping file not found: {resolvedMappingFile}", resolvedMappingFile),
+                    "MappingFileNotFound",
+                    ErrorCategory.ObjectNotFound,
+                    resolvedMappingFile));
                 return;
             }
 
@@ -84,8 +104,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     workingPath = tempPath;
                 }
 
-                // Build PAC CLI arguments
-                var args = $"solution pack --zipfile \"{resolvedOutputPath}\" --folder \"{workingPath}\" --packagetype {PackageType}";
+                var args = BuildPackArguments(resolvedOutputPath, workingPath, PackageType, resolvedMappingFile);
 
                 // Execute PAC CLI
                 var result = PacCliHelper.ExecutePacCliWithOutput(this, args);
@@ -124,6 +143,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     }
                 }
             }
+        }
+
+        internal static string BuildPackArguments(string outputPath, string folderPath, SolutionPackageType packageType, string mappingFile)
+        {
+            var arguments = $"solution pack --zipfile \"{outputPath}\" --folder \"{folderPath}\" --packagetype {packageType}";
+            if (!string.IsNullOrEmpty(mappingFile))
+            {
+                arguments += $" --map \"{mappingFile}\"";
+            }
+            return arguments;
         }
 
         internal static void PackMsappFolders(string basePath, Cmdlet cmdlet)

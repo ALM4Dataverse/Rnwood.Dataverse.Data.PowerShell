@@ -47,11 +47,11 @@ $ErrorActionPreference = "Stop"
 Write-Host "=== Prerelease Tag Validation ===" -ForegroundColor Cyan
 Write-Host ""
 
-# Get all tags sorted by version
-$allTags = git tag --list --sort=-version:refname 2>$null
+# Get all tags
+$allTags = git tag --list 2>$null
 
 # Find the latest stable release (no prerelease suffix)
-$latestStableTag = $allTags | Where-Object { $_ -notmatch '-' } | Select-Object -First 1
+$latestStableTag = & ./scripts/Get-StableReleaseTags.ps1 -Tags $allTags | Select-Object -First 1
 
 if (-not $latestStableTag) {
     Write-Host "No stable release tag found. Nothing to check." -ForegroundColor Yellow

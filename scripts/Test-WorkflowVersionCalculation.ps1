@@ -82,6 +82,21 @@ $testScenarios = @(
 $passed = 0
 $failed = 0
 
+$stableTags = @(& ./scripts/Get-StableReleaseTags.ps1 -Tags @(
+    "v3.0.1",
+    "3.2.0",
+    "3.1.0",
+    "v3.1.0-ci202610193682"
+))
+$expectedStableTags = @("3.2.0", "3.1.0", "v3.0.1")
+if (($stableTags -join ",") -eq ($expectedStableTags -join ",")) {
+    Write-Host "✓ Stable release tags are sorted numerically across v-prefixed and bare tags" -ForegroundColor Green
+    $passed++
+} else {
+    Write-Host "✗ Stable release tags were not sorted numerically: $($stableTags -join ', ')" -ForegroundColor Red
+    $failed++
+}
+
 foreach ($scenario in $testScenarios) {
     Write-Host "Scenario: $($scenario.Name)" -ForegroundColor Yellow
     Write-Host "  Stable Release: $($scenario.StableRelease)"

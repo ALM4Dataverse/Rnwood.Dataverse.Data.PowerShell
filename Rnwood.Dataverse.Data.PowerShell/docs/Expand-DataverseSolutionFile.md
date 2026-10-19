@@ -14,14 +14,15 @@ Unpacks a Dataverse solution file using the Power Apps CLI.
 
 ```
 Expand-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-UnpackMsapp]
- [-PackageType <SolutionPackageType>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-PackageType <SolutionPackageType>] [-MappingFile <String>] [-ProgressAction <ActionPreference>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 The `Expand-DataverseSolutionFile` cmdlet unpacks a Dataverse solution ZIP file into a folder structure using the Power Apps CLI (`pac solution unpack` command). This is useful for version control and manual editing of solution components.
 
 The cmdlet requires the Power Apps CLI to be installed and available in your system PATH. Install from https://aka.ms/PowerAppsCLI
+Use `-MappingFile` to apply a SolutionPackager mapping XML file while unpacking.
 
 ## EXAMPLES
 
@@ -46,7 +47,29 @@ Expand-DataverseSolutionFile -Path "C:\Solutions\MySolution.zip" -OutputPath "C:
 
 Unpacks the solution for dual managed and unmanaged operation. This creates separate folder structures for both types.
 
+### Example 4: Unpack a solution using a mapping file
+```powershell
+Expand-DataverseSolutionFile -Path "C:\Solutions\MySolution.zip" -OutputPath "C:\Solutions\MySolution_Src" -MappingFile "C:\Solutions\mapping.xml"
+```
+
+Applies the specified SolutionPackager mappings while unpacking the solution.
+
 ## PARAMETERS
+
+### -MappingFile
+Mapping XML file used to resolve component file paths while unpacking.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -OutputPath
 Output path where the solution will be unpacked.

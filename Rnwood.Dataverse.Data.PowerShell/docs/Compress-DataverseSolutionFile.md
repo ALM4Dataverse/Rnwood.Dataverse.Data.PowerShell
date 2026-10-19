@@ -14,6 +14,7 @@ Packs a Dataverse solution folder using the Power Apps CLI.
 
 ```
 Compress-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-PackageType <SolutionPackageType>]
+ [-MappingFile <String>]
  [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -38,7 +39,29 @@ Compress-DataverseSolutionFile -Path "C:\Solutions\MySolution_Src" -OutputPath "
 
 Packs a managed solution from a folder that was previously unpacked with `-PackageType Both`. Any folders with `.msapp` extension are automatically zipped into .msapp files before packing.
 
+### Example 3: Pack a solution using a mapping file
+```powershell
+Compress-DataverseSolutionFile -Path "C:\Solutions\MySolution_Src" -OutputPath "C:\Solutions\MySolution.zip" -MappingFile "C:\Solutions\MySolution_Src\mapping.xml"
+```
+
+Uses the SolutionPackager mapping XML file when resolving component file paths. Folders with `.msapp` extension are still packed automatically before the solution is packaged.
+
 ## PARAMETERS
+
+### -MappingFile
+Path to a SolutionPackager mapping XML file used to resolve component file paths.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -OutputPath
 Output path for the packed solution file (.zip).
