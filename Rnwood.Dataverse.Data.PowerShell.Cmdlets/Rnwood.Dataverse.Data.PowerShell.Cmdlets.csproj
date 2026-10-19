@@ -54,7 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.17.1" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="JsonSchema.Net" Version="7.3.3" />
     <PackageReference Include="YamlDotNet" Version="17.0.1" />
     <PackageReference Include="MarkMpn.Sql4Cds.Engine" Version="10.2.0" />
