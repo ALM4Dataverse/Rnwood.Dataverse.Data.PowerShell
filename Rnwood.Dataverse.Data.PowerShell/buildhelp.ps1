@@ -57,6 +57,13 @@ if (-not (Test-Path $outdir)) { New-Item -ItemType Directory -Path $outdir -Forc
 
 New-ExternalHelp -Verbose -Path $docsPath -OutputPath (Join-Path $outdir 'en-GB')
 
+# Also copy to en-US so PowerShell on en-US Windows locales can find help
+$enUS = Join-Path $outdir 'en-US'
+if (Test-Path $enUS) {
+    Remove-Item -Recurse -Force $enUS
+}
+Copy-Item -Recurse (Join-Path $outdir 'en-GB') $enUS
+
 # Save the new hash for incremental checks next time
 try {
     $currentHash | Out-File -FilePath $hashFile -Encoding UTF8 -Force
