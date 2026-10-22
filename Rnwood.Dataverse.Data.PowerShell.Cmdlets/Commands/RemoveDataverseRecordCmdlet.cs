@@ -48,6 +48,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         [Parameter(Mandatory = false, HelpMessage = "List of list of column names that identify records to delete based on the values of those columns in the InputObject. The first list that returns a match is used. If AllowMultipleMatches is not specified, an error will be raised if more than one record matches.")]
         public string[][] MatchOn { get; set; }
         /// <summary>
+        /// If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.
+        /// </summary>
+        [Parameter(HelpMessage = "If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.")]
+        public SwitchParameter NoLookup { get; set; }
+        /// <summary>
         /// If specified, allows deletion of multiple records when MatchOn criteria matches more than one record. Without this switch, an error is raised if MatchOn finds multiple matches.
         /// </summary>
         [Parameter(HelpMessage = "If specified, allows deletion of multiple records when MatchOn criteria matches more than one record. Without this switch, an error is raised if MatchOn finds multiple matches.")]
@@ -184,7 +189,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 {
                     // Convert InputObject to Entity to get values for matching
                     // Use the existing entity converter instance for efficiency
-                    var conversionOptions = new ConvertToDataverseEntityOptions();
+                    var conversionOptions = new ConvertToDataverseEntityOptions { DisallowLookupQueries = NoLookup.IsPresent };
                     Entity inputEntity = _entityConverter.ConvertToDataverseEntity(InputObject, TableName, conversionOptions);
 
                     _matchOnResolveQueue.Add(new MatchOnResolveItem
@@ -224,7 +229,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
             // Convert InputObject to Entity to get values for matching
             var entityConverter = new DataverseEntityConverter(Connection, _metadataFactory);
-            var conversionOptions = new ConvertToDataverseEntityOptions();
+            var conversionOptions = new ConvertToDataverseEntityOptions { DisallowLookupQueries = NoLookup.IsPresent };
             Entity inputEntity = entityConverter.ConvertToDataverseEntity(InputObject, TableName, conversionOptions);
 
             foreach (string[] matchOnColumnList in MatchOn)

@@ -123,6 +123,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             set;
         }
         /// <summary>
+        /// If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.
+        /// </summary>
+        [Parameter(HelpMessage = "If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.")]
+        public SwitchParameter NoLookup { get; set; }
+        /// <summary>
         /// Specifies the types of business logic (for example plugins) to bypass
         /// </summary>
         [Parameter(HelpMessage = "Specifies the types of business logic (for example plugins) to bypass")]
@@ -335,6 +340,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             ConvertToDataverseEntityOptions options = new ConvertToDataverseEntityOptions();
 
+            options.DisallowLookupQueries = NoLookup.IsPresent;
 
             options.IgnoredPropertyName.Add("TableName");
             options.IgnoredPropertyName.Add("EntityName");
