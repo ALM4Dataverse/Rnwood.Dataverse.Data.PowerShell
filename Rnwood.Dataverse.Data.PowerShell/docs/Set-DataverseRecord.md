@@ -945,7 +945,7 @@ Accept wildcard characters: False
 
 ### -Upsert
 If specified, upsert request will be used to create/update existing records as appropriate.
--MatchOn is not supported with this option
+With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.
 
 ```yaml
 Type: SwitchParameter
