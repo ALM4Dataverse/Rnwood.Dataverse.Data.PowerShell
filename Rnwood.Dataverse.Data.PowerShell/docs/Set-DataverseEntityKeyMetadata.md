@@ -241,11 +241,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - Alternate keys cannot be updated after creation. To modify a key, delete it first and then create a new one.
 - Publishing is required for the key to become active, but can be done separately if needed.

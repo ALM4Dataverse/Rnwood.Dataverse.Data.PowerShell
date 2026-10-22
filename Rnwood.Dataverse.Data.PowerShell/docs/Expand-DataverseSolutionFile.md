@@ -14,8 +14,8 @@ Unpacks a Dataverse solution file using the Power Apps CLI.
 
 ```
 Expand-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-UnpackMsapp]
- [-PackageType <SolutionPackageType>] [-MappingFile <String>] [-ProgressAction <ActionPreference>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PackageType <SolutionPackageType>] [-MappingFile <String>] [-ProgressAction <ActionPreference>] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -183,7 +183,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

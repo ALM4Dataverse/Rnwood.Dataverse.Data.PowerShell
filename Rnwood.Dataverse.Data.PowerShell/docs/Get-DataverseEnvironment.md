@@ -269,11 +269,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### Microsoft.Xrm.Sdk.Discovery.OrganizationDetail
-
 ## NOTES
 - This cmdlet requires an active internet connection to communicate with the Global Discovery Service.
 - The authenticated user must have access to at least one Dataverse environment to receive results.

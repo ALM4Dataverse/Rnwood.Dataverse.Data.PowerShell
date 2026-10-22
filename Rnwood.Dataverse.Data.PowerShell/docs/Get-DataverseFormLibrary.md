@@ -172,11 +172,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Guid
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 Form libraries must reference valid web resources of type Script (JScript). The web resource should exist in the environment before being added to a form.
 

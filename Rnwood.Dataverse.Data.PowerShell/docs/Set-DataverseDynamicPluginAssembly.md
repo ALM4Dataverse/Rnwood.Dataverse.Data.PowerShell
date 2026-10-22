@@ -380,11 +380,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - Source code must contain at least one class implementing `Microsoft.Xrm.Sdk.IPlugin`, otherwise an error is thrown
 - Plugin types are automatically created/removed based on classes implementing `IPlugin`

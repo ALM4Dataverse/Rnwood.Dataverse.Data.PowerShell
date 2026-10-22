@@ -238,13 +238,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-
 ### System.Guid
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - This cmdlet uses the RetrieveMissingDependenciesRequest SDK message (with -Missing) or RetrieveDependenciesForUninstallRequest SDK message (with -Uninstall).
 - For -Missing mode: Returns entities with properties like missingcomponentid, missingcomponenttype, requiredcomponentid, and requiredcomponenttype.

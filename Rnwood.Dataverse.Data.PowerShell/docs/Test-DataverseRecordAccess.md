@@ -173,13 +173,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-
 ### System.Guid
-
 ## OUTPUTS
 
 ### Microsoft.Crm.Sdk.Messages.AccessRights
-
 ## NOTES
 See https://learn.microsoft.com/en-us/dotnet/api/microsoft.crm.sdk.messages.retrieveprincipalaccessrequest?view=dataverse-sdk-latest
 

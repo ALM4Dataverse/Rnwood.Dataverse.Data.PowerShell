@@ -288,6 +288,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -MappingFile
+Mapping XML file used to resolve component file paths while unpacking.
+
+```yaml
+Type: String
+Parameter Sets: ToFolder
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -OutFile
 Path where the exported solution file should be saved.
 
@@ -312,21 +327,6 @@ Parameter Sets: ToFolder
 Aliases:
 
 Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MappingFile
-Mapping XML file used to resolve component file paths while unpacking.
-
-```yaml
-Type: String
-Parameter Sets: ToFolder
-Aliases:
-
-Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -490,11 +490,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Byte[]
-
 ## NOTES
 
 This cmdlet uses the ExportSolutionAsyncRequest API which exports the solution in the background. The cmdlet monitors the async operation and downloads the solution file when complete.
