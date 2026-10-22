@@ -14,7 +14,7 @@ Deletes an existing Dataverse record, including M:M association records.
 
 ```
 Remove-DataverseRecord [-InputObject <PSObject>] -TableName <String> [-Id <Guid>] [-MatchOn <String[][]>]
- [-AllowMultipleMatches] [-BatchSize <UInt32>] [-RetrievalBatchSize <UInt32>] [-IfExists]
+ [-NoLookup] [-AllowMultipleMatches] [-BatchSize <UInt32>] [-RetrievalBatchSize <UInt32>] [-IfExists]
  [-BypassBusinessLogicExecution <BusinessLogicTypes[]>] [-BypassBusinessLogicExecutionStepIds <Guid[]>]
  [-Retries <Int32>] [-InitialRetryDelay <Int32>] [-MaxDegreeOfParallelism <Int32>]
  [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
@@ -405,6 +405,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: 1
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoLookup
+If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`, instead.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

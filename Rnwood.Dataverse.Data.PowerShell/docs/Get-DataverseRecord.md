@@ -24,10 +24,11 @@ Get-DataverseRecord [-TableName] <String> [-VerboseRecordCount] [-RecordCount] [
 
 ### MatchOn
 ```
-Get-DataverseRecord [-TableName] <String> -InputObject <PSObject> -MatchOn <String[][]> [-AllowMultipleMatches]
- [-VerboseRecordCount] [-RecordCount] [-Columns <String[]>] [-ExcludeColumns <String[]>] [-OrderBy <String[]>]
- [-Top <Int32>] [-PageSize <Int32>] [-RetrievalBatchSize <UInt32>] [-LookupValuesReturnName]
- [-IncludeSystemColumns] [-IncludeFileAndImageMetadataColumns] [-Unpublished] [-Connection <ServiceClient>]
+Get-DataverseRecord [-TableName] <String> -InputObject <PSObject> -MatchOn <String[][]> [-NoLookup]
+ [-AllowMultipleMatches] [-VerboseRecordCount] [-RecordCount] [-Columns <String[]>]
+ [-ExcludeColumns <String[]>] [-OrderBy <String[]>] [-Top <Int32>] [-PageSize <Int32>]
+ [-RetrievalBatchSize <UInt32>] [-LookupValuesReturnName] [-IncludeSystemColumns]
+ [-IncludeFileAndImageMetadataColumns] [-Unpublished] [-Connection <ServiceClient>]
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -684,6 +685,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoLookup
+If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`, instead.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: MatchOn
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
