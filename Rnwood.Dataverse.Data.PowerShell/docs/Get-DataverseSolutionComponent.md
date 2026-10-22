@@ -164,13 +164,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-
 ### System.Guid
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - **Component Types**: The cmdlet returns components with numeric ComponentType values. Common types include:
   - 1: Entity

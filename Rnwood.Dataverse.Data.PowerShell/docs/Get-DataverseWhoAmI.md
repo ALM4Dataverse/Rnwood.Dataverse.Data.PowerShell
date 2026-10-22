@@ -75,11 +75,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### Microsoft.Crm.Sdk.Messages.WhoAmIResponse
-
 ## NOTES
 See https://learn.microsoft.com/en-us/dotnet/api/microsoft.crm.sdk.messages.whoamiresponse?view=dataverse-sdk-latest
 

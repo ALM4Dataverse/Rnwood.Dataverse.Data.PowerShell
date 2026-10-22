@@ -291,11 +291,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - This cmdlet requires internet access to download icons from the online icon set.
 - The web resource is created in the format `{PublisherPrefix}_/icons/{IconName}.svg`.

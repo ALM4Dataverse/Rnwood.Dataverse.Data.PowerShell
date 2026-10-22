@@ -30,6 +30,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public PSObject InputObject { get; set; }
 
         /// <summary>
+        /// If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.
+        /// </summary>
+        [Parameter(ParameterSetName = PARAMSET_OBJECT, HelpMessage = "If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.")]
+        public SwitchParameter NoLookup { get; set; }
+
+        /// <summary>
         /// Gets or sets the ID of the web resource to update.
         /// </summary>
         [Parameter(ParameterSetName = PARAMSET_OBJECT, HelpMessage = "ID of the web resource to update. If not specified, creates a new web resource or matches by name.")]
@@ -144,7 +150,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             var metadataFactory = new EntityMetadataFactory(Connection);
             var converter = new DataverseEntityConverter(Connection, metadataFactory);
-            var entity = converter.ConvertToDataverseEntity(InputObject, "webresource", new ConvertToDataverseEntityOptions());
+            var entity = converter.ConvertToDataverseEntity(InputObject, "webresource", new ConvertToDataverseEntityOptions { DisallowLookupQueries = NoLookup.IsPresent });
 
             if (Id.HasValue)
             {

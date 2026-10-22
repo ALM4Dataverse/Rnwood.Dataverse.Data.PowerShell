@@ -436,11 +436,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Guid
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 - The web resource must exist (published or unpublished) before adding a handler.
 - If a handler with the same function name and library already exists, it will be updated.

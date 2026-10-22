@@ -16,7 +16,7 @@ Creates or updates Dataverse records including M:M association/disassociation, s
 Set-DataverseRecord -InputObject <PSObject> -TableName <String> [-BatchSize <UInt32>]
  [-RetrievalBatchSize <UInt32>] [-IgnoreProperties <String[]>] [-Id <Guid>] [-MatchOn <String[][]>]
  [-AllowMultipleMatches] [-PassThru] [-NoUpdate] [-NoCreate] [-NoUpdateColumns <String[]>] [-CallerId <Guid>]
- [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-LookupColumns <Hashtable>]
+ [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-LookupColumns <Hashtable>] [-NoLookup]
  [-BypassBusinessLogicExecution <BusinessLogicTypes[]>] [-BypassBusinessLogicExecutionStepIds <Guid[]>]
  [-Retries <Int32>] [-InitialRetryDelay <Int32>] [-MaxDegreeOfParallelism <Int32>] [-EnableDuplicateDetection]
  [-FileDirectory <String>] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
@@ -46,7 +46,10 @@ Lookup and UniqueIdentifier columns will accept any of:
  - the name of the target record (as long as it is unique)
  - the Id of a record in one of the tables the lookup targets
  - an object which has `TableName`/`LogicalName`/`EntityName` and `Id` properties. This includes `EntityReference` instances from the SDK and values as returned from `Get-DataverseRecord`.
+ - an object with a `TableName`/`LogicalName`/`EntityName` property and a `KeyAttributes` hashtable containing the target table's alternate key columns and values, for example `@{ TableName = "account"; KeyAttributes = @{ accountnumber = "A-123" } }`.
  - $null or empty string.
+
+Name values are resolved by querying the target table. Use `-NoLookup` to reject lookup values that would require such a query. With `-NoLookup`, supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`.
 
 Party list columns accept a collection of objects each of which need to be convertible to a `activityparty` table record using the rules above.
 
@@ -811,6 +814,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoLookup
+If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`, instead.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoUpdate
 If specified existing records matching the ID and or MatchOn fields will not be updated.
 
@@ -996,13 +1014,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Management.Automation.PSObject
-
 ### System.String
-
 ### System.Guid
-
-### System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]
-
+### System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]
 ## OUTPUTS
 
 ### System.Object

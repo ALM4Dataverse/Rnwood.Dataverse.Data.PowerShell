@@ -167,7 +167,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                 try
                 {
-                    object convertedValue = ConvertToDataverseValue(entityMetadata, property.Name, attributeMetadata, property.Value, columnOptions);
+                    object convertedValue = ConvertToDataverseValue(entityMetadata, property.Name, attributeMetadata, property.Value, columnOptions, options.DisallowLookupQueries);
 
                     if (attributeMetadata != null)
                     {
@@ -441,13 +441,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// <summary>
         /// Converts a PowerShell value to a Dataverse value.
         /// </summary>
-        public object ConvertToDataverseValue(EntityMetadata entityMetadata, string propertyName, AttributeMetadata attributeMetadata, object psValue, ConvertToDataverseEntityColumnOptions columnOptions)
+        public object ConvertToDataverseValue(EntityMetadata entityMetadata, string propertyName, AttributeMetadata attributeMetadata, object psValue, ConvertToDataverseEntityColumnOptions columnOptions, bool disallowLookupQueries = false)
         {
             if (propertyName.Equals("calendarrules", StringComparison.OrdinalIgnoreCase)) //Magic attribute no metadata
             {
                 if (psValue is IEnumerable)
                 {
-                    ConvertToDataverseEntityOptions options = new ConvertToDataverseEntityOptions();
+                    ConvertToDataverseEntityOptions options = new ConvertToDataverseEntityOptions
+                    {
+                        DisallowLookupQueries = disallowLookupQueries
+                    };
 
                     Entity[] entities = ((IEnumerable)psValue).Cast<object>().Select(PSObject.AsPSObject)
                         .Select(o => ConvertToDataverseEntity(o, "calendarrule", options)).ToArray();
@@ -473,7 +476,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 case AttributeTypeCode.PartyList:
                     if (psValue is IEnumerable)
                     {
-                        ConvertToDataverseEntityOptions options = new ConvertToDataverseEntityOptions();
+                        ConvertToDataverseEntityOptions options = new ConvertToDataverseEntityOptions
+                        {
+                            DisallowLookupQueries = disallowLookupQueries
+                        };
 
                         Entity[] entities = ((IEnumerable)psValue).Cast<object>().Select(PSObject.AsPSObject)
                             .Select(o => ConvertToDataverseEntity(o, "activityparty", options)).ToArray();
@@ -511,6 +517,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                                 if (lookupEntity != null)
                                 {
+                                    if (disallowLookupQueries)
+                                    {
+                                        throw CreateLookupResolutionDisabledException(entityMetadata, attributeMetadata);
+                                    }
+
                                     var targetEntityMetadata = entityMetadataFactory.GetLimitedMetadata(lookupEntity);
                                     string lookupNameAttribute = targetEntityMetadata.PrimaryNameAttribute;
 
@@ -700,7 +711,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                         {
                             convertedValue = ((DataverseEntityReference)psValue).ToEntityReference();
                         }
-                        if (psValue != null && psValue is PSObject)
+                        else if (psValue is EntityReference entityReference)
+                        {
+                            convertedValue = entityReference;
+                        }
+                        else if (psValue != null && psValue is PSObject)
                         {
                             PSObject customObj = (PSObject)psValue;
 
@@ -720,7 +735,46 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                 throw new FormatException("Could not convert value to entity reference. TableName(/EntityName/LogicalName) property is missing");
                             }
 
-                            convertedValue = new EntityReference((string)nameProp.Value, Guid.Parse(customObj.Properties["Id"].Value.ToString()));
+                            var keyAttributesProp = customObj.Properties.FirstOrDefault(p => p.Name.Equals("KeyAttributes", StringComparison.OrdinalIgnoreCase));
+                            if (keyAttributesProp?.Value != null)
+                            {
+                                convertedValue = new EntityReference((string)nameProp.Value, ConvertToKeyAttributeCollection(keyAttributesProp.Value));
+                            }
+                            else
+                            {
+                                var idProp = customObj.Properties.FirstOrDefault(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
+                                if (idProp?.Value == null || !Guid.TryParse(idProp.Value.ToString(), out Guid referenceId))
+                                {
+                                    throw new FormatException("Could not convert value to entity reference. Id property is missing or is not a valid GUID");
+                                }
+
+                                convertedValue = new EntityReference((string)nameProp.Value, referenceId);
+                            }
+                        }
+                        else if (psValue is IDictionary lookupObject)
+                        {
+                            string tableName = GetDictionaryValue(lookupObject, "TableName")?.ToString()
+                                ?? GetDictionaryValue(lookupObject, "EntityName")?.ToString()
+                                ?? GetDictionaryValue(lookupObject, "LogicalName")?.ToString();
+
+                            if (string.IsNullOrWhiteSpace(tableName))
+                            {
+                                throw new FormatException("Could not convert value to entity reference. TableName(/EntityName/LogicalName) property is missing");
+                            }
+
+                            object keyAttributes = GetDictionaryValue(lookupObject, "KeyAttributes");
+                            if (keyAttributes != null)
+                            {
+                                convertedValue = new EntityReference(tableName, ConvertToKeyAttributeCollection(keyAttributes));
+                            }
+                            else if (Guid.TryParse(Convert.ToString(GetDictionaryValue(lookupObject, "Id")), out Guid referenceId))
+                            {
+                                convertedValue = new EntityReference(tableName, referenceId);
+                            }
+                            else
+                            {
+                                throw new FormatException("Could not convert value to entity reference. Either a valid Id or KeyAttributes property is required");
+                            }
                         }
                         else if (!string.IsNullOrWhiteSpace(stringValue) &&
                             (
@@ -792,6 +846,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                     convertedValue = new EntityReference(lookupAttributeMetadata.Targets[0], guidValue);
                                     break;
                                 }
+                            }
+
+                            if (disallowLookupQueries)
+                            {
+                                throw CreateLookupResolutionDisabledException(entityMetadata, attributeMetadata);
                             }
 
                             bool applyStateFilter = true;
@@ -984,6 +1043,60 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             }
 
             return convertedValue;
+        }
+
+        private static FormatException CreateLookupResolutionDisabledException(EntityMetadata entityMetadata, AttributeMetadata attributeMetadata)
+        {
+            return new FormatException(
+                $"Resolving the value for column '{attributeMetadata.LogicalName}' on table '{entityMetadata.LogicalName}' requires a lookup query, but lookup queries are disabled. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead of a name.");
+        }
+
+        private static object GetDictionaryValue(IDictionary dictionary, string key)
+        {
+            foreach (DictionaryEntry entry in dictionary)
+            {
+                if (string.Equals(Convert.ToString(entry.Key), key, StringComparison.OrdinalIgnoreCase))
+                {
+                    return entry.Value;
+                }
+            }
+
+            return null;
+        }
+
+        private static KeyAttributeCollection ConvertToKeyAttributeCollection(object keyAttributesValue)
+        {
+            if (keyAttributesValue is KeyAttributeCollection existingKeyAttributes)
+            {
+                return existingKeyAttributes;
+            }
+
+            var keyAttributes = new KeyAttributeCollection();
+            if (keyAttributesValue is IDictionary dictionary)
+            {
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    keyAttributes.Add(Convert.ToString(entry.Key), entry.Value);
+                }
+            }
+            else if (keyAttributesValue is PSObject psObject)
+            {
+                foreach (PSPropertyInfo property in psObject.Properties)
+                {
+                    keyAttributes.Add(property.Name, property.Value);
+                }
+            }
+            else
+            {
+                throw new FormatException("KeyAttributes must be a hashtable or object whose properties are the alternate key columns and values");
+            }
+
+            if (keyAttributes.Count == 0)
+            {
+                throw new FormatException("KeyAttributes must contain at least one alternate key column and value");
+            }
+
+            return keyAttributes;
         }
 
         /// <summary>

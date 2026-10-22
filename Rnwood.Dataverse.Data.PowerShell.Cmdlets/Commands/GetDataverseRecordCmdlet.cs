@@ -54,6 +54,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public string[][] MatchOn { get; set; }
 
         /// <summary>
+        /// If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.
+        /// </summary>
+        [Parameter(ParameterSetName = PARAMSET_MATCHON, HelpMessage = "If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with TableName and Id, or TableName and KeyAttributes, instead.")]
+        public SwitchParameter NoLookup { get; set; }
+
+        /// <summary>
         /// If specified, returns all records matching the MatchOn criteria. Without this switch, an error is raised if MatchOn finds multiple matches.
         /// </summary>
         [Parameter(ParameterSetName = PARAMSET_MATCHON, HelpMessage = "If specified, returns all records matching the MatchOn criteria. Without this switch, an error is raised if MatchOn finds multiple matches.")]
@@ -303,7 +309,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 entityMetadata = entityMetadata ?? entiyMetadataFactory.GetLimitedMetadata(TableName);
 
                 // Convert InputObject to Entity to extract match values
-                var conversionOptions = new ConvertToDataverseEntityOptions();
+                var conversionOptions = new ConvertToDataverseEntityOptions { DisallowLookupQueries = NoLookup.IsPresent };
                 Entity inputEntity = entityConverter.ConvertToDataverseEntity(InputObject, TableName, conversionOptions);
 
                 _matchOnQueue.Add(new GetMatchOnItem
@@ -736,7 +742,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         private QueryExpression GetMatchOnQuery()
         {
             // Convert InputObject to Entity to extract match values
-            var conversionOptions = new ConvertToDataverseEntityOptions();
+            var conversionOptions = new ConvertToDataverseEntityOptions { DisallowLookupQueries = NoLookup.IsPresent };
             Entity inputEntity = entityConverter.ConvertToDataverseEntity(InputObject, TableName, conversionOptions);
 
             QueryExpression finalQuery = null;

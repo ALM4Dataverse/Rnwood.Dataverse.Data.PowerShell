@@ -24,10 +24,11 @@ Get-DataverseRecord [-TableName] <String> [-VerboseRecordCount] [-RecordCount] [
 
 ### MatchOn
 ```
-Get-DataverseRecord [-TableName] <String> -InputObject <PSObject> -MatchOn <String[][]> [-AllowMultipleMatches]
- [-VerboseRecordCount] [-RecordCount] [-Columns <String[]>] [-ExcludeColumns <String[]>] [-OrderBy <String[]>]
- [-Top <Int32>] [-PageSize <Int32>] [-RetrievalBatchSize <UInt32>] [-LookupValuesReturnName]
- [-IncludeSystemColumns] [-IncludeFileAndImageMetadataColumns] [-Unpublished] [-Connection <ServiceClient>]
+Get-DataverseRecord [-TableName] <String> -InputObject <PSObject> -MatchOn <String[][]> [-NoLookup]
+ [-AllowMultipleMatches] [-VerboseRecordCount] [-RecordCount] [-Columns <String[]>]
+ [-ExcludeColumns <String[]>] [-OrderBy <String[]>] [-Top <Int32>] [-PageSize <Int32>]
+ [-RetrievalBatchSize <UInt32>] [-LookupValuesReturnName] [-IncludeSystemColumns]
+ [-IncludeFileAndImageMetadataColumns] [-Unpublished] [-Connection <ServiceClient>]
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -688,6 +689,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoLookup
+If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`, instead.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: MatchOn
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -OrderBy
 List of fields to order records by.
 Suffix field name with - to sort descending.
@@ -833,11 +849,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Management.Automation.PSObject
-
 ## OUTPUTS
 
-### System.Collections.Generic.IEnumerable`1[[System.Management.Automation.PSObject, System.Management.Automation, Version=7.5.0.500, Culture=neutral, PublicKeyToken=31bf3856ad364e35]]
-
+### System.Collections.Generic.IEnumerable`1[[System.Management.Automation.PSObject, System.Management.Automation, Version=7.6.0.500, Culture=neutral, PublicKeyToken=31bf3856ad364e35]]
 ## NOTES
 
 ## RELATED LINKS

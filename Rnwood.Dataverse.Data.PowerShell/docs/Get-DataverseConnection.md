@@ -836,11 +836,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### Microsoft.PowerPlatform.Dataverse.Client.ServiceClient
-
 ## NOTES
 
 ## RELATED LINKS

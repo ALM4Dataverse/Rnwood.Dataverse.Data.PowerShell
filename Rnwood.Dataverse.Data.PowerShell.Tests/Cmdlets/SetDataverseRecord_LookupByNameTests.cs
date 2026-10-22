@@ -350,5 +350,71 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             
             allContacts.Should().HaveCount(3);
         }
+
+        [Fact]
+        public void SetDataverseRecord_NoLookup_RejectsNameResolution()
+        {
+            int retrieveMultipleCount = 0;
+            var mockConnection = CreateMockConnection(request =>
+            {
+                if (request is Microsoft.Xrm.Sdk.Messages.RetrieveMultipleRequest)
+                {
+                    retrieveMultipleCount++;
+                }
+
+                return null;
+            }, "contact");
+
+            using var ps = CreatePowerShellWithCmdlets();
+            var input = PSObject.AsPSObject(new Hashtable
+            {
+                ["firstname"] = "Child",
+                ["parentcontactid"] = "Parent name"
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("CreateOnly", true)
+              .AddParameter("NoLookup", true);
+
+            ps.Invoke(new[] { input });
+
+            var errors = string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString()));
+            ps.HadErrors.Should().BeTrue();
+            errors.Should().Contain("lookup queries are disabled")
+                .And.Contain("TableName and Id")
+                .And.Contain("TableName and KeyAttributes");
+            retrieveMultipleCount.Should().Be(0);
+        }
+
+        [Fact]
+        public void DataverseEntityConverter_Lookup_UsesAlternateKeyReference()
+        {
+            var mockConnection = CreateMockConnection("contact");
+            var converter = new DataverseEntityConverter(mockConnection, new EntityMetadataFactory(mockConnection));
+            var input = PSObject.AsPSObject(new Hashtable
+            {
+                ["parentcontactid"] = new Hashtable
+                {
+                    ["TableName"] = "contact",
+                    ["KeyAttributes"] = new Hashtable
+                    {
+                        ["emailaddress1"] = "parent@example.com"
+                    }
+                }
+            });
+
+            var converted = converter.ConvertToDataverseEntity(input, "contact", new ConvertToDataverseEntityOptions
+            {
+                DisallowLookupQueries = true
+            });
+
+            var reference = converted.GetAttributeValue<EntityReference>("parentcontactid");
+            reference.LogicalName.Should().Be("contact");
+            reference.Id.Should().Be(Guid.Empty);
+            reference.KeyAttributes.Should().ContainKey("emailaddress1");
+            reference.KeyAttributes["emailaddress1"].Should().Be("parent@example.com");
+        }
     }
 }

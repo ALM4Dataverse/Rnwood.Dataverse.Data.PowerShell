@@ -14,9 +14,9 @@ Creates or updates web resources in a Dataverse environment.
 
 ### InputObject
 ```
-Set-DataverseWebResource -InputObject <PSObject> [-Id <Guid>] [-Name <String>] [-Publish] [-PassThru]
- [-NoUpdate] [-NoCreate] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+Set-DataverseWebResource -InputObject <PSObject> [-NoLookup] [-Id <Guid>] [-Name <String>] [-Publish]
+ [-PassThru] [-NoUpdate] [-NoCreate] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### File
@@ -263,6 +263,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoLookup
+If specified, rejects lookup values that require a query to resolve a related record. Supply a reference object with `TableName` and `Id`, or `TableName` and `KeyAttributes`, instead.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: InputObject
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoUpdate
 If set, skips updating existing web resources (only creates new ones)
 
@@ -408,11 +423,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Management.Automation.PSObject
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 
 ## RELATED LINKS

@@ -612,25 +612,16 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Guid
-
 ### System.String
-
 ### System.Object[]
-
 ### System.Collections.Hashtable[]
-
 ### Rnwood.Dataverse.Data.PowerShell.Commands.DataverseLinkEntity[]
-
 ### System.String[]
-
 ### System.Management.Automation.SwitchParameter
-
 ### System.Nullable`1[[Rnwood.Dataverse.Data.PowerShell.Commands.QueryType, Rnwood.Dataverse.Data.PowerShell.Cmdlets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]
-
 ## OUTPUTS
 
 ### System.Guid
-
 ## NOTES
 
 **Upsert Pattern:**

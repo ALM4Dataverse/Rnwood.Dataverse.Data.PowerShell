@@ -28,5 +28,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// Gets the column-specific options for conversion.
         /// </summary>
         public Dictionary<string, ConvertToDataverseEntityColumnOptions> ColumnOptions { get; private set;}
+
+        /// <summary>
+        /// Gets or sets a value indicating whether lookup values that require record queries are rejected.
+        /// </summary>
+        public bool DisallowLookupQueries { get; set; }
     }
 }

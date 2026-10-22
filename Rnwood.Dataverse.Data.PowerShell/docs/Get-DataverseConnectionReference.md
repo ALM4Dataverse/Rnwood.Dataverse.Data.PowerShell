@@ -144,11 +144,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-
 ## OUTPUTS
 
 ### System.Management.Automation.PSObject
-
 ## NOTES
 
 This cmdlet automatically handles paging when retrieving large numbers of connection references, so you don't need to worry about result size limits.

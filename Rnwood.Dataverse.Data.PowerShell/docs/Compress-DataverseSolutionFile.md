@@ -14,8 +14,7 @@ Packs a Dataverse solution folder using the Power Apps CLI.
 
 ```
 Compress-DataverseSolutionFile [-Path] <String> [-OutputPath] <String> [-PackageType <SolutionPackageType>]
- [-MappingFile <String>]
- [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-MappingFile <String>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -160,7 +159,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object
