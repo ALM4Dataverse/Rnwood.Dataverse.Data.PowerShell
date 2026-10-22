@@ -108,9 +108,9 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         [Parameter(HelpMessage = "If specified, no check for existing record is made and records will always be attempted to be created. Use this option when it's known that no existing matching records will exist to improve performance. See the -noupdate option for an alternative.")]
         public SwitchParameter CreateOnly { get; set; }
         /// <summary>
-        /// If specified, upsert request will be used to create/update existing records as appropriate. -MatchOn is not supported with this option
+        /// If specified, upsert request will be used to create/update existing records as appropriate. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.
         /// </summary>
-        [Parameter(HelpMessage = "If specified, upsert request will be used to create/update existing records as appropriate. -MatchOn is not supported with this option")]
+        [Parameter(HelpMessage = "If specified, upsert request will be used to create/update existing records as appropriate. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.")]
         public SwitchParameter Upsert { get; set; }
         /// <summary>
         /// Hashset mapping lookup column names in the target entity to column names in the referred-to table for resolving lookup references.
