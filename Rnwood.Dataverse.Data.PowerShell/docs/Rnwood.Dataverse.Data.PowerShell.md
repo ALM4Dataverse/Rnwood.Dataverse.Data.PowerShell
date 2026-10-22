@@ -26,6 +26,9 @@ Unpacks a Dataverse solution file using the Power Apps CLI.
 ### [Export-DataverseSolution](Export-DataverseSolution.md)
 Exports a solution from Dataverse using an asynchronous job with progress reporting.
 
+### [Get-DataverseAdminPortalUrl](Get-DataverseAdminPortalUrl.md)
+Generates a URL to open the Power Platform Admin Center for the current environment.
+
 ### [Get-DataverseAppModule](Get-DataverseAppModule.md)
 Retrieves app module (model-driven app) information from a Dataverse environment.
 
@@ -93,6 +96,9 @@ Retrieves tab information from a Dataverse form.
 ### [Get-DataverseIconSetIcon](Get-DataverseIconSetIcon.md)
 Retrieves available icons from supported online icon sets.
 
+### [Get-DataverseMakerPortalUrl](Get-DataverseMakerPortalUrl.md)
+Generates a URL to open the Power Apps Maker Portal for the current environment.
+
 ### [Get-DataverseMsAppComponent](Get-DataverseMsAppComponent.md)
 Retrieves components from a .msapp file.
 
@@ -141,6 +147,9 @@ Retrieves all principals (users or teams) who have shared access to a specific r
 ### [Get-DataverseRecordsFolder](Get-DataverseRecordsFolder.md)
 Reads a folder of JSON files written out by `Set-DataverseRecordFolder` and converts back into a stream of PS objects.
 Together these commands can be used to extract and import data to and from files, for instance for inclusion in source control, or build/deployment assets.
+
+### [Get-DataverseRecordUrl](Get-DataverseRecordUrl.md)
+Generates a URL to open a record in the Dataverse web interface.
 
 ### [Get-DataverseRelationshipMetadata](Get-DataverseRelationshipMetadata.md)
 Retrieves relationship metadata from Dataverse.
