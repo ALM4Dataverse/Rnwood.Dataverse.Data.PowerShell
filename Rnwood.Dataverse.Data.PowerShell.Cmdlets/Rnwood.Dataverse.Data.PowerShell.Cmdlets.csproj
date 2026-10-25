@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyTitle>Rnwood.Dataverse.Data.PowerShell.Cmdlets</AssemblyTitle>
     <Product>Rnwood.Dataverse.Data.PowerShell</Product>
-    <Copyright>Copyright © 2023-2025 Robert Wood and project contributors</Copyright>
+    <Copyright>Copyright © 2023-2026 Robert Wood and project contributors</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
