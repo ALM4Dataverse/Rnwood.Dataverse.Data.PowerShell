@@ -7,7 +7,7 @@
 		<AssemblyTitle>XrmToolbox Plugin Host for PowerShell</AssemblyTitle>
 		<Product>Rnwood.Dataverse.Data.PowerShell.XrmToolboxPluginHost</Product>
 		<Description>Helper process to execute XrmToolbox plugins from PowerShell with connection injection</Description>
-		<Copyright>Copyright © 2024-2025 Robert Wood and project contributors</Copyright>
+		<Copyright>Copyright © 2024-2026 Robert Wood and project contributors</Copyright>
 		<Authors>Rob Wood</Authors>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<Version>1.2016.11</Version>
