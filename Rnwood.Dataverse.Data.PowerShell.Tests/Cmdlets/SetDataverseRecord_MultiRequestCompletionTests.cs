@@ -7,6 +7,7 @@ using System.Management.Automation.Runspaces;
 using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Query;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;
@@ -268,6 +269,135 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             requests.OfType<CreateMultipleRequest>().Should().BeEmpty();
             requests.OfType<ExecuteMultipleRequest>().Should().ContainSingle()
                 .Which.Requests.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void SetDataverseRecord_FallsBackToExecuteMultipleWhenBulkMessageIsUnavailable()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                if (request is RetrieveMultipleRequest retrieveRequest &&
+                    retrieveRequest.Query is QueryExpression query &&
+                    query.EntityName == "sdkmessagefilter")
+                {
+                    var response = new RetrieveMultipleResponse();
+                    response.Results["EntityCollection"] = new EntityCollection();
+                    return response;
+                }
+
+                requests.Add(request);
+                return null;
+            }, "contact");
+
+            var records = Enumerable.Range(1, 2)
+                .Select(i => PSObject.AsPSObject(new Hashtable
+                {
+                    ["firstname"] = $"Fallback{i}",
+                    ["lastname"] = "Create"
+                }))
+                .ToArray();
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("CreateOnly", true)
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(records);
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.ToString())));
+            requests.OfType<CreateMultipleRequest>().Should().BeEmpty();
+            requests.OfType<ExecuteMultipleRequest>().Should().ContainSingle()
+                .Which.Requests.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void SetDataverseRecord_EnableDuplicateDetectionUsesExecuteMultiple()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requests.Add(request);
+                return null;
+            }, "contact");
+
+            var records = Enumerable.Range(1, 2)
+                .Select(i => PSObject.AsPSObject(new Hashtable
+                {
+                    ["firstname"] = $"DuplicateDetection{i}",
+                    ["lastname"] = "Create"
+                }))
+                .ToArray();
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("CreateOnly", true)
+              .AddParameter("BatchSize", 10)
+              .AddParameter("EnableDuplicateDetection", true);
+            ps.Invoke(records);
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.ToString())));
+            requests.OfType<CreateMultipleRequest>().Should().BeEmpty();
+            requests.OfType<ExecuteMultipleRequest>().Should().ContainSingle()
+                .Which.Requests.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void SetBatchProcessor_CompletionFailureReportsErrorAndContinuesBatch()
+        {
+            var errors = new List<ErrorRecord>();
+            var mockConnection = CreateMockConnection("contact");
+            var metadataFactory = new EntityMetadataFactory(mockConnection);
+            var entityConverter = new DataverseEntityConverter(mockConnection, metadataFactory);
+            var parameters = new SetDataverseRecordCmdlet();
+
+            SetOperationContext CreateContext(string firstname, Action<OrganizationResponse> completion)
+            {
+                var target = new Entity("contact") { ["firstname"] = firstname };
+                var context = new SetOperationContext(
+                    PSObject.AsPSObject(new Hashtable { ["firstname"] = firstname }),
+                    "contact",
+                    null,
+                    parameters,
+                    metadataFactory,
+                    entityConverter,
+                    mockConnection,
+                    null,
+                    _ => { },
+                    errors.Add,
+                    _ => { },
+                    _ => true)
+                {
+                    Target = target
+                };
+                context.Requests.Add(new CreateRequest { Target = target });
+                context.ResponseCompletion = completion;
+                return context;
+            }
+
+            var processor = new SetBatchProcessor(
+                10,
+                false,
+                mockConnection,
+                _ => { },
+                _ => true,
+                () => false,
+                default,
+                _ => { },
+                () => Guid.Empty);
+            processor.QueueOperation(CreateContext("CompletionFailure", _ => throw new InvalidOperationException("completion failed")));
+            processor.QueueOperation(CreateContext("CompletionSuccess", _ => { }));
+            processor.Flush();
+
+            errors.Should().ContainSingle().Which.Exception.Message.Should().Be("completion failed");
+            Service!.RetrieveMultiple(new QueryExpression("contact")
+            {
+                ColumnSet = new ColumnSet("firstname")
+            }).Entities.Select(entity => entity.GetAttributeValue<string>("firstname"))
+                .Should().BeEquivalentTo("CompletionFailure", "CompletionSuccess");
         }
     }
 }

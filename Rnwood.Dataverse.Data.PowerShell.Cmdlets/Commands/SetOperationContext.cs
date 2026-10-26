@@ -307,13 +307,15 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
         public void AddAssignmentFollowUp(EntityReference assignee)
         {
+            Guid? targetId = Target.Id == Guid.Empty ? null : Target.Id;
+            string targetLogicalName = Target.LogicalName;
             DependentOperations.Add(parent =>
             {
                 var context = parent.CreateDependentContext();
                 var request = new AssignRequest
                 {
                     Assignee = assignee,
-                    Target = parent.Target.ToEntityReference()
+                    Target = new EntityReference(targetLogicalName, targetId ?? parent.Target.Id)
                 };
                 parent.ApplyBypassBusinessLogicExecution(request);
                 context.Requests.Add(request);
@@ -325,12 +327,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
         public void AddSetStateFollowUp(OptionSetValue state, OptionSetValue status)
         {
+            Guid? targetId = Target.Id == Guid.Empty ? null : Target.Id;
+            string targetLogicalName = Target.LogicalName;
             DependentOperations.Add(parent =>
             {
                 var context = parent.CreateDependentContext();
                 var request = new SetStateRequest
                 {
-                    EntityMoniker = parent.Target.ToEntityReference(),
+                    EntityMoniker = new EntityReference(targetLogicalName, targetId ?? parent.Target.Id),
                     State = state,
                     Status = status
                 };

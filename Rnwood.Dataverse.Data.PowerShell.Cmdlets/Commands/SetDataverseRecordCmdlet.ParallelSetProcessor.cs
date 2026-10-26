@@ -83,14 +83,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         public void QueueOperation(SetOperationContext context)
         {
+            QueueOperationCore(context);
+
+            // Drain queues to write any pending outputs
+            DrainQueues();
+        }
+
+        private void QueueOperationCore(SetOperationContext context)
+        {
             _workQueue.Enqueue(context);
             Interlocked.Increment(ref _totalQueuedCount);
 
             // Start worker tasks if we have work and capacity
             EnsureWorkersStarted();
-
-            // Drain queues to write any pending outputs
-            DrainQueues();
         }
 
         /// <summary>
@@ -100,27 +105,35 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             _inputComplete = true;
 
-            // Give workers a chance to pick up remaining work
-            while (!_workQueue.IsEmpty && !_isStopping() && !_cancellationToken.IsCancellationRequested)
+            while (!_isStopping() && !_cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(50);
+                List<Task> tasksToWait;
+                lock (_tasksLock)
+                {
+                    _activeTasks.RemoveAll(task => task.IsCompleted);
+                    tasksToWait = new List<Task>(_activeTasks);
+                }
+
+                if (tasksToWait.Count > 0)
+                {
+                    Task.WaitAll(tasksToWait.ToArray());
+                }
+
+                lock (_tasksLock)
+                {
+                    _activeTasks.RemoveAll(task => task.IsCompleted);
+                    if (_workQueue.IsEmpty && _activeTasks.Count == 0)
+                    {
+                        break;
+                    }
+                }
+
+                EnsureWorkersStarted();
                 DrainQueues();
             }
 
-            List<Task> tasksToWait;
-            lock (_tasksLock)
-            {
-                tasksToWait = new List<Task>(_activeTasks);
-            }
-
-            _verboseQueue.Enqueue($"Waiting for {tasksToWait.Count} parallel tasks to complete...");
+            _verboseQueue.Enqueue($"Waiting for parallel operations to complete...");
             DrainQueues();
-
-            // Wait for all active tasks to complete
-            if (tasksToWait.Count > 0)
-            {
-                Task.WaitAll(tasksToWait.ToArray());
-            }
 
             // Drain any remaining outputs
             DrainQueues();
@@ -283,7 +296,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                             // Call completion callback for this request
                                             if (workerContext.ResponseCompletions != null && i < workerContext.ResponseCompletions.Count && workerContext.ResponseCompletions[i] != null)
                                             {
-                                                workerContext.ResponseCompletions[i](response);
+                                                try
+                                                {
+                                                    workerContext.ResponseCompletions[i](response);
+                                                }
+                                                catch (Exception completionException)
+                                                {
+                                                    _errorQueue.Enqueue(new ErrorRecord(
+                                                        completionException,
+                                                        null,
+                                                        ErrorCategory.InvalidResult,
+                                                        originalContext.InputObject));
+                                                }
                                             }
                                         }
 
@@ -412,7 +436,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             foreach (var createDependentOperation in context.DependentOperations)
             {
-                QueueOperation(createDependentOperation(context));
+                QueueOperationCore(createDependentOperation(context));
             }
         }
     }

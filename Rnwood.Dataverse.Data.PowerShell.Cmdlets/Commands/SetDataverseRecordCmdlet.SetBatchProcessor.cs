@@ -19,6 +19,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
     {
         private readonly List<SetOperationContext> _nextBatchItems;
         private readonly List<SetOperationContext> _pendingRetries;
+        private readonly Dictionary<string, bool> _bulkMessageSupport;
         private readonly uint _batchSize;
         private readonly bool _useExecuteMultiple;
         private readonly IOrganizationService _connection;
@@ -52,6 +53,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             _getCallerId = getCallerId;
             _nextBatchItems = new List<SetOperationContext>();
             _pendingRetries = new List<SetOperationContext>();
+            _bulkMessageSupport = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -165,6 +167,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     continue;
                 }
 
+                if (!IsBulkMessageSupported(target.LogicalName, request.RequestName))
+                {
+                    _writeVerbose($"Bulk message {request.RequestName} is not available for table {target.LogicalName}; using ExecuteMultiple.");
+                    executeMultipleItems.Add(batchItems[index]);
+                    index++;
+                    continue;
+                }
+
                 List<SetOperationContext> bulkItems = new List<SetOperationContext> { batchItems[index] };
                 int nextIndex = index + 1;
                 while (nextIndex < batchItems.Count &&
@@ -195,6 +205,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             }
 
             request = context.Requests[0];
+            if (request.Parameters.Contains("SuppressDuplicateDetection"))
+            {
+                return false;
+            }
+
             switch (request)
             {
                 case CreateRequest createRequest:
@@ -209,6 +224,28 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 default:
                     return false;
             }
+        }
+
+        private bool IsBulkMessageSupported(string tableName, string messageName)
+        {
+            string key = $"{tableName}:{messageName}";
+            if (_bulkMessageSupport.TryGetValue(key, out bool isSupported))
+            {
+                return isSupported;
+            }
+
+            var query = new QueryExpression("sdkmessagefilter")
+            {
+                ColumnSet = new ColumnSet("sdkmessagefilterid"),
+                TopCount = 1
+            };
+            query.Criteria.AddCondition("primaryobjecttypecode", ConditionOperator.Equal, tableName);
+            var messageLink = query.AddLink("sdkmessage", "sdkmessageid", "sdkmessageid");
+            messageLink.LinkCriteria.AddCondition("name", ConditionOperator.Equal, messageName);
+
+            isSupported = _connection.RetrieveMultiple(query).Entities.Count > 0;
+            _bulkMessageSupport.Add(key, isSupported);
+            return isSupported;
         }
 
         private static bool CanShareBulkRequest(
@@ -365,14 +402,28 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
         private void InvokeCompletion(SetOperationContext context, OrganizationResponse response)
         {
-            if (context.ResponseCompletions != null &&
-                context.ResponseCompletions.Count > 0 &&
-                context.ResponseCompletions[0] != null)
+            try
             {
-                context.ResponseCompletions[0](response);
+                if (context.ResponseCompletions != null &&
+                    context.ResponseCompletions.Count > 0 &&
+                    context.ResponseCompletions[0] != null)
+                {
+                    context.ResponseCompletions[0](response);
+                }
+            }
+            catch (Exception e)
+            {
+                context.ReportError(e);
             }
 
-            QueueDependentOperations(context);
+            try
+            {
+                QueueDependentOperations(context);
+            }
+            catch (Exception e)
+            {
+                context.ReportError(e);
+            }
         }
 
         private void QueueDependentOperations(SetOperationContext context)
@@ -459,7 +510,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                 i < context.ResponseCompletions.Count &&
                                 context.ResponseCompletions[i] != null)
                             {
-                                context.ResponseCompletions[i](itemResponse.Response);
+                                try
+                                {
+                                    context.ResponseCompletions[i](itemResponse.Response);
+                                }
+                                catch (Exception e)
+                                {
+                                    context.ReportError(e);
+                                }
                             }
                         }
 
