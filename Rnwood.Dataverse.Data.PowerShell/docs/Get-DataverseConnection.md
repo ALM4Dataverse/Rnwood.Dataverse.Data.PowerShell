@@ -51,6 +51,13 @@ Get-DataverseConnection [-SetAsDefault] [-Name <String>] [-ClientId <Guid>] [-Ur
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
+### Authenticate with Web Account Manager (WAM)
+```
+Get-DataverseConnection [-SetAsDefault] [-Name <String>] [-ClientId <Guid>] [-Url <Uri>] [-Username <String>]
+ [-UseWAM] [-Timeout <UInt32>] [-TenantId <Guid>] [-DisableAffinityCookie]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
 ### Authenticate using the device code flow
 ```
 Get-DataverseConnection [-SetAsDefault] [-Name <String>] [-ClientId <Guid>] [-Url <Uri>] [-Username <String>]
@@ -124,6 +131,7 @@ See the examples for this pattern below.
 
 Multiple authentication methods are supported:
 - Interactive authentication (browser-based)
+- Web Account Manager (WAM) authentication on Windows, using the signed-in Windows account
 - Device code flow (for remote/headless scenarios)
 - Username/password
 - Client secret (for service principal authentication)
@@ -187,6 +195,13 @@ PS C:\> $c = Get-DataverseConnection -Interactive
 ```
 
 Authenticates interactively without specifying a URL. The cmdlet will automatically display a list of available Dataverse environments for the user to select from. This is useful when you have access to multiple environments and don't want to manually specify the URL.
+
+### Example 6b
+```powershell
+PS C:\> $c = Get-DataverseConnection -Url https://myorg.crm11.dynamics.com -UseWAM -Username "user@contoso.com"
+```
+
+Authenticates using Web Account Manager (WAM) on Windows, allowing the user to select an account in the system account picker. The optional `-Username` value hints at the intended account but does not restrict which account can be selected.
 
 ### Example 7
 ```powershell
@@ -454,7 +469,7 @@ Client ID to use for authentication. By default the MS provided ID for PAC CLI (
 
 ```yaml
 Type: Guid
-Parameter Sets: Authenticate with username and password, Authenticate interactively, Authenticate using the device code flow
+Parameter Sets: Authenticate with username and password, Authenticate interactively, Authenticate with Web Account Manager (WAM), Authenticate using the device code flow
 Aliases:
 
 Required: False
@@ -611,6 +626,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -UseWAM
+Authenticates interactively using Web Account Manager (WAM) on Windows.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Authenticate with Web Account Manager (WAM)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -ListConnections
 Lists all saved named connections.
 
@@ -661,7 +691,7 @@ Name to save this connection under for later retrieval. Allows you to persist an
 
 ```yaml
 Type: String
-Parameter Sets: Authenticate with username and password, Authenticate with client secret, Authenticate with client certificate, Authenticate interactively, Authenticate using the device code flow, Authenticate with DefaultAzureCredential, Authenticate with ManagedIdentityCredential
+Parameter Sets: Authenticate with username and password, Authenticate with client secret, Authenticate with client certificate, Authenticate interactively, Authenticate with Web Account Manager (WAM), Authenticate using the device code flow, Authenticate with DefaultAzureCredential, Authenticate with ManagedIdentityCredential
 Aliases:
 
 Required: False
@@ -793,7 +823,7 @@ URL of the Dataverse environment to connect to. For example https://myorg.crm11.
 
 ```yaml
 Type: Uri
-Parameter Sets: Authenticate with username and password, Authenticate with client secret, Authenticate with client certificate, Authenticate interactively, Authenticate using the device code flow, Authenticate with DefaultAzureCredential, Authenticate with ManagedIdentityCredential, Authenticate with access token script block
+Parameter Sets: Authenticate with username and password, Authenticate with client secret, Authenticate with client certificate, Authenticate interactively, Authenticate with Web Account Manager (WAM), Authenticate using the device code flow, Authenticate with DefaultAzureCredential, Authenticate with ManagedIdentityCredential, Authenticate with access token script block
 Aliases:
 
 Required: False
@@ -804,7 +834,7 @@ Accept wildcard characters: False
 ```
 
 ### -Username
-Username to authenticate with.
+Username to authenticate with. For interactive and WAM authentication, this is an optional login hint to help identify the intended account.
 
 ```yaml
 Type: String
@@ -820,7 +850,7 @@ Accept wildcard characters: False
 
 ```yaml
 Type: String
-Parameter Sets: Authenticate interactively, Authenticate using the device code flow
+Parameter Sets: Authenticate interactively, Authenticate with Web Account Manager (WAM), Authenticate using the device code flow
 Aliases:
 
 Required: False
