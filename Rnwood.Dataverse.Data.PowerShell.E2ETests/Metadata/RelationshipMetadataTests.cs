@@ -58,6 +58,8 @@ try {
     Write-Host 'Cleanup - Removing test entities...'
     Invoke-WithRetry {
         Remove-DataverseEntityMetadata -Connection $connection -EntityName $entity1Name -Confirm:$false
+    }
+    Invoke-WithRetry {
         Remove-DataverseEntityMetadata -Connection $connection -EntityName $entity2Name -Confirm:$false
     }
     Write-Host '✓ Test entities deleted'
