@@ -47,10 +47,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         {
             if (request is UpsertMultipleRequest upsertMultipleRequest)
             {
-                var responses = new OrganizationResponseCollection();
+                var responses = new List<UpsertResponse>();
                 foreach (var target in upsertMultipleRequest.Targets.Entities)
                 {
-                    responses.Add(UpsertRequestInterceptor(new UpsertRequest { Target = target })!);
+                    responses.Add((UpsertResponse)UpsertRequestInterceptor(new UpsertRequest { Target = target })!);
                 }
 
                 var multipleResponse = new UpsertMultipleResponse();

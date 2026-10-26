@@ -374,9 +374,13 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 else if (response is UpsertMultipleResponse ||
                     string.Equals(response.ResponseName, "UpsertMultiple", StringComparison.OrdinalIgnoreCase))
                 {
-                    var responses = ((IEnumerable<OrganizationResponse>)response.Results["Results"])
-                        .Cast<UpsertResponse>()
-                        .ToArray();
+                    if (!response.Results.TryGetValue("Results", out object resultsValue) ||
+                        resultsValue is not IEnumerable upsertResponseCollection)
+                    {
+                        throw new InvalidOperationException("UpsertMultiple response did not contain a Results collection.");
+                    }
+
+                    var responses = upsertResponseCollection.Cast<UpsertResponse>().ToArray();
                     if (responses.Length != contexts.Count)
                     {
                         throw new InvalidOperationException(

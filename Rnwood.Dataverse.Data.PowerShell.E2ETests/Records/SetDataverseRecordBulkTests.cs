@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Rnwood.Dataverse.Data.PowerShell.E2ETests.Records
 {
+    [Collection(SchemaChangesCollection.Name)]
     public class SetDataverseRecordBulkTests : E2ETestBase
     {
         [Fact]
@@ -66,7 +67,96 @@ finally {
             var result = RunScript(script);
 
             result.Success.Should().BeTrue($"Script should succeed. StdErr: {result.StandardError}\nStdOut: {result.StandardOutput}");
-            result.StandardOutput.Should().Contain("SUCCESS", because: result.GetFullOutput());
+            result.StandardOutput.Should().Contain("SUCCESS: bulk create/update", because: result.GetFullOutput());
+        }
+
+        [Fact]
+        public void BulkUpsertUsesRealUpsertMultipleResponseCollection()
+        {
+            var script = GetConnectionScript(@"
+$ErrorActionPreference = 'Stop'
+$ConfirmPreference = 'None'
+$testRunId = [guid]::NewGuid().ToString('N').Substring(0, 8)
+$timestamp = [DateTime]::UtcNow.ToString('yyyyMMddHHmm')
+$entityName = ""new_bulkupsert_${timestamp}_$testRunId""
+$entityCreated = $false
+$recordIds = [System.Collections.Generic.List[guid]]::new()
+
+try {
+    Invoke-WithRetry {
+        Set-DataverseEntityMetadata -Connection $connection `
+            -EntityName $entityName `
+            -SchemaName ""new_BulkUpsert_${timestamp}_$testRunId"" `
+            -DisplayName 'Bulk Upsert Test' `
+            -DisplayCollectionName 'Bulk Upsert Tests' `
+            -PrimaryAttributeSchemaName 'new_name' `
+            -OwnershipType UserOwned `
+            -Confirm:$false
+    }
+    $entityCreated = $true
+
+    $capabilityQuery = [Microsoft.Xrm.Sdk.Query.QueryExpression]::new('sdkmessagefilter')
+    $capabilityQuery.ColumnSet = [Microsoft.Xrm.Sdk.Query.ColumnSet]::new('sdkmessagefilterid')
+    $capabilityQuery.TopCount = 1
+    $capabilityQuery.Criteria.AddCondition(
+        'primaryobjecttypecode',
+        [Microsoft.Xrm.Sdk.Query.ConditionOperator]::Equal,
+        $entityName)
+    $messageLink = $capabilityQuery.AddLink('sdkmessage', 'sdkmessageid', 'sdkmessageid')
+    $messageLink.LinkCriteria.AddCondition(
+        'name',
+        [Microsoft.Xrm.Sdk.Query.ConditionOperator]::Equal,
+        'UpsertMultiple')
+    if ($connection.RetrieveMultiple($capabilityQuery).Entities.Count -eq 0) {
+        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
+    }
+
+    $id1 = [guid]::NewGuid()
+    $id2 = [guid]::NewGuid()
+    $recordIds.Add($id1)
+    $recordIds.Add($id2)
+    $inputs = @(
+        @{ Id = $id1; new_name = ""Upsert-$testRunId-1"" }
+        @{ Id = $id2; new_name = ""Upsert-$testRunId-2"" }
+    )
+    $upserted = @($inputs | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10)
+    if ($upserted.Count -ne 2 -or [guid]$upserted[0].Id -ne $id1 -or [guid]$upserted[1].Id -ne $id2) {
+        throw 'UpsertMultiple did not return the expected response IDs.'
+    }
+
+    $updates = @(
+        @{ Id = $id1; new_name = ""UpdatedUpsert-$testRunId-1"" }
+        @{ Id = $id2; new_name = ""UpdatedUpsert-$testRunId-2"" }
+    )
+    $upsertedUpdates = @($updates | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10)
+    if ($upsertedUpdates.Count -ne 2) {
+        throw 'UpsertMultiple did not return one response per updated record.'
+    }
+    foreach ($record in $upsertedUpdates) {
+        $stored = Get-DataverseRecord -Connection $connection -TableName $entityName -Id $record.Id
+        if ($stored.new_name -notlike ""UpdatedUpsert-$testRunId-*"") {
+            throw ""UpsertMultiple did not update record $($record.Id).""
+        }
+    }
+
+    Write-Host 'SUCCESS: UpsertMultiple response collection processed'
+}
+finally {
+    if ($entityCreated) {
+        foreach ($recordId in $recordIds) {
+            Remove-DataverseRecord -Connection $connection -TableName $entityName -Id $recordId -Confirm:$false -ErrorAction Continue
+        }
+        Invoke-WithRetry {
+            Remove-DataverseEntityMetadata -Connection $connection -EntityName $entityName -Confirm:$false
+        }
+    }
+}
+");
+
+            var result = RunScript(script);
+
+            result.Success.Should().BeTrue($"Script should succeed. StdErr: {result.StandardError}\nStdOut: {result.StandardOutput}");
+            result.StandardOutput.Should().Contain("SUCCESS: UpsertMultiple response collection processed", because: result.GetFullOutput());
         }
     }
 }
