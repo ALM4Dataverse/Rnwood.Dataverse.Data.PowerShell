@@ -66,7 +66,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
 
         public static bool ContainsCreateOrUpdate(OrganizationRequest request)
         {
-            if (request is CreateRequest || request is UpdateRequest)
+            if (request is CreateRequest ||
+                request is UpdateRequest ||
+                request is UpsertRequest ||
+                request is CreateMultipleRequest ||
+                request is UpdateMultipleRequest ||
+                request is UpsertMultipleRequest)
             {
                 return true;
             }

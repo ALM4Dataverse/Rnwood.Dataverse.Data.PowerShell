@@ -46,6 +46,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             NoCreate = parameters.NoCreate;
             CreateOnly = parameters.CreateOnly;
             Upsert = parameters.Upsert;
+            UseExecuteMultiple = parameters.UseExecuteMultiple;
             PassThru = parameters.PassThru;
             UpdateAllColumns = parameters.UpdateAllColumns;
             NoUpdateColumns = parameters.NoUpdateColumns;
@@ -79,6 +80,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public bool NoCreate { get; }
         public bool CreateOnly { get; }
         public bool Upsert { get; }
+        public bool UseExecuteMultiple { get; }
         public bool PassThru { get; }
         public bool UpdateAllColumns { get; }
         public string[] NoUpdateColumns { get; }

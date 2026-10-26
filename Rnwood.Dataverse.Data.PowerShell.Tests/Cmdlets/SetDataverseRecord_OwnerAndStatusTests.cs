@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;
@@ -315,6 +316,37 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             
             // Assert
             ps.HadErrors.Should().BeFalse();
+        }
+
+        [Fact]
+        public void SetDataverseRecord_BulkCreateRunsStatusChangeInFollowingExecuteMultipleBatch()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requestNames = new List<string>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requestNames.Add(request.RequestName);
+                return null;
+            }, "contact");
+
+            var newRecord = PSObject.AsPSObject(new
+            {
+                firstname = "Bulk",
+                lastname = "Status",
+                statuscode = 2
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(new[] { newRecord });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            var createMultipleIndex = requestNames.IndexOf("CreateMultiple");
+            var executeMultipleIndex = requestNames.IndexOf("ExecuteMultiple");
+            createMultipleIndex.Should().BeGreaterThanOrEqualTo(0);
+            executeMultipleIndex.Should().BeGreaterThan(createMultipleIndex);
         }
     }
 }

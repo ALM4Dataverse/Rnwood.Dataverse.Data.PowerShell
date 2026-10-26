@@ -17,6 +17,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
     {
         private readonly int _maxDegreeOfParallelism;
         private readonly uint _batchSize;
+        private readonly bool _useExecuteMultiple;
         private readonly ServiceClient _connection;
         private readonly Action<string> _writeVerbose;
         private readonly Action<ErrorRecord> _writeError;
@@ -42,6 +43,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public ParallelSetProcessor(
             int maxDegreeOfParallelism,
             uint batchSize,
+            bool useExecuteMultiple,
             ServiceClient connection,
             Action<string> writeVerbose,
             Action<ErrorRecord> writeError,
@@ -55,6 +57,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             _maxDegreeOfParallelism = maxDegreeOfParallelism;
             _batchSize = batchSize;
+            _useExecuteMultiple = useExecuteMultiple;
             _connection = connection;
             _writeVerbose = writeVerbose;
             _writeError = writeError;
@@ -185,6 +188,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 {
                     batchProcessor = new SetBatchProcessor(
                         _batchSize,
+                        _useExecuteMultiple,
                         workerConnection,
                         (msg) => _verboseQueue.Enqueue(msg),
                         (target) => true, // Always return true - ShouldProcess was already called

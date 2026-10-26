@@ -44,6 +44,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         /// </summary>
         private OrganizationResponse? UpsertRequestInterceptor(OrganizationRequest request)
         {
+            if (request is UpsertMultipleRequest upsertMultipleRequest)
+            {
+                var responses = new OrganizationResponseCollection();
+                foreach (var target in upsertMultipleRequest.Targets.Entities)
+                {
+                    responses.Add(UpsertRequestInterceptor(new UpsertRequest { Target = target })!);
+                }
+
+                var multipleResponse = new UpsertMultipleResponse();
+                ((OrganizationResponse)multipleResponse).Results["Results"] = responses;
+                return multipleResponse;
+            }
+
             if (request is UpsertRequest upsertRequest)
             {
                 var target = upsertRequest.Target;
@@ -247,14 +260,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             // Assert
             ps.HadErrors.Should().BeFalse(errors);
             
-            // Verify UpsertRequest was used (not separate Retrieve/Create/Update)
-            var upsertRequests = requestsCaptured.OfType<UpsertRequest>().ToList();
-            upsertRequests.Should().HaveCountGreaterThan(0, "Should use UpsertRequest");
+            // Verify UpsertMultipleRequest was used (not separate Retrieve/Create/Update)
+            var upsertRequests = requestsCaptured.OfType<UpsertMultipleRequest>().ToList();
+            upsertRequests.Should().ContainSingle("Should use UpsertMultipleRequest");
             
             var createRequests = requestsCaptured.OfType<CreateRequest>().ToList();
             var updateRequests = requestsCaptured.OfType<UpdateRequest>().ToList();
             
-            // When using Upsert, the cmdlet should use UpsertRequest directly
+            // When using Upsert, the cmdlet should use UpsertMultipleRequest directly
             // The interceptor converts it to Create/Update, but cmdlet shouldn't issue separate requests
             (createRequests.Count + updateRequests.Count).Should().Be(0, 
                 "Cmdlet should use UpsertRequest, not separate Create/Update requests");
@@ -396,12 +409,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         {
             // Arrange
             using var ps = CreatePowerShellWithCmdlets();
-            var upsertRequests = new List<UpsertRequest>();
+            var upsertRequests = new List<UpsertMultipleRequest>();
             var retrieveRequests = new List<RetrieveMultipleRequest>();
             
             OrganizationResponse? TrackingInterceptor(OrganizationRequest request)
             {
-                if (request is UpsertRequest upsert)
+                if (request is UpsertMultipleRequest upsert)
                 {
                     upsertRequests.Add(upsert);
                 }
@@ -435,13 +448,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var results1 = ps.Invoke(new[] { record1 });
             var errors1 = string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString()));
 
-            // Assert - Upsert uses UpsertRequest
+            // Assert - Upsert uses UpsertMultipleRequest
             ps.HadErrors.Should().BeFalse(errors1);
-            upsertRequests.Should().HaveCountGreaterThan(0, "Should use UpsertRequest with -Upsert flag");
+            upsertRequests.Should().ContainSingle("Should use UpsertMultipleRequest with -Upsert flag");
             
-            // The UpsertRequest should have KeyAttributes set
-            upsertRequests.Should().Contain(r => r.Target.KeyAttributes != null && r.Target.KeyAttributes.Count > 0,
-                "UpsertRequest should include alternate key attributes");
+            // Each target in the UpsertMultipleRequest should have its alternate key set
+            upsertRequests.SelectMany(r => r.Targets.Entities)
+                .Should().Contain(r => r.KeyAttributes != null && r.KeyAttributes.Count > 0,
+                    "UpsertMultipleRequest targets should include alternate key attributes");
 
             // Clear tracking for second test
             ps.Streams.Error.Clear();
@@ -468,7 +482,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
 
             // Assert - MatchOn uses cmdlet logic (Retrieve + Create/Update)
             ps.HadErrors.Should().BeFalse(errors2);
-            upsertRequests.Should().HaveCount(0, "Should NOT use UpsertRequest with -MatchOn flag alone");
+            upsertRequests.Should().BeEmpty("Should NOT use UpsertMultipleRequest with -MatchOn flag alone");
             retrieveRequests.Should().HaveCountGreaterThan(0, 
                 "Should use RetrieveMultiple (cmdlet logic) with -MatchOn flag alone");
         }

@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;
@@ -61,7 +62,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var results = ps.Invoke(inputCollection);
 
             // Assert - Verify PassThru worked (Id was set by completion handler)
-            ps.HadErrors.Should().BeFalse();
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
             results.Should().HaveCount(1);
             
             var result = results[0];
@@ -97,7 +98,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var results = ps.Invoke(inputCollection);
 
             // Assert - Verify all records were created and PassThru worked for all
-            ps.HadErrors.Should().BeFalse();
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
             results.Should().HaveCount(3);
             
             var expectedNames = new[] { "Contact1", "Contact2", "Contact3" };
@@ -145,7 +146,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var results = ps.Invoke(inputCollection);
 
             // Assert - Verify PassThru worked (Id was set by completion handler)
-            ps.HadErrors.Should().BeFalse();
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
             results.Should().HaveCount(1);
             
             var result = results[0];
@@ -162,6 +163,111 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var retrieved = ps.Invoke();
             
             retrieved[0].Properties["firstname"].Value.Should().Be("Test");
+        }
+
+        [Fact]
+        public void SetDataverseRecord_BatchesWithCreateMultipleByDefault()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requests.Add(request);
+                return null;
+            }, "contact");
+
+            var records = Enumerable.Range(1, 3)
+                .Select(i => PSObject.AsPSObject(new Hashtable
+                {
+                    ["firstname"] = $"Bulk{i}",
+                    ["lastname"] = "Create"
+                }))
+                .ToArray();
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("CreateOnly", true)
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(records);
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
+            var createMultiple = requests.OfType<CreateMultipleRequest>()
+                .Should().ContainSingle($"Captured requests: {string.Join(", ", requests.Select(r => $"{r.RequestName}:{r.GetType().FullName}"))}")
+                .Which;
+            createMultiple.Targets.Entities.Should().HaveCount(3);
+            requests.OfType<ExecuteMultipleRequest>().Should().BeEmpty();
+        }
+
+        [Fact]
+        public void SetDataverseRecord_BatchesUpdatesWithUpdateMultipleByDefault()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requests.Add(request);
+                return null;
+            }, "contact");
+
+            var recordIds = Enumerable.Range(1, 2)
+                .Select(i => Service!.Create(new Entity("contact")
+                {
+                    ["firstname"] = $"Before{i}",
+                    ["lastname"] = "Update"
+                }))
+                .ToArray();
+            var updates = recordIds.Select((id, i) => PSObject.AsPSObject(new Hashtable
+            {
+                ["contactid"] = id,
+                ["firstname"] = $"After{i}"
+            })).ToArray();
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(updates);
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
+            var updateMultiple = requests.OfType<UpdateMultipleRequest>()
+                .Should().ContainSingle($"Captured requests: {string.Join(", ", requests.Select(r => $"{r.RequestName}:{r.GetType().FullName}"))}")
+                .Which;
+            updateMultiple.Targets.Entities.Should().HaveCount(2);
+            requests.OfType<ExecuteMultipleRequest>().Should().BeEmpty();
+        }
+
+        [Fact]
+        public void SetDataverseRecord_UseExecuteMultiplePreservesLegacyBatching()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requests.Add(request);
+                return null;
+            }, "contact");
+
+            var records = Enumerable.Range(1, 2)
+                .Select(i => PSObject.AsPSObject(new Hashtable
+                {
+                    ["firstname"] = $"Legacy{i}",
+                    ["lastname"] = "Create"
+                }))
+                .ToArray();
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("CreateOnly", true)
+              .AddParameter("BatchSize", 10)
+              .AddParameter("UseExecuteMultiple", true);
+            ps.Invoke(records);
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.Exception?.Message ?? e.ToString())));
+            requests.OfType<CreateMultipleRequest>().Should().BeEmpty();
+            requests.OfType<ExecuteMultipleRequest>().Should().ContainSingle()
+                .Which.Requests.Should().HaveCount(2);
         }
     }
 }
