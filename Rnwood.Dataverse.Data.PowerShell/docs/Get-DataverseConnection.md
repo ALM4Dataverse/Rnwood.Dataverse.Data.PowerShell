@@ -198,16 +198,10 @@ Authenticates interactively without specifying a URL. The cmdlet will automatica
 
 ### Example 6b
 ```powershell
-PS C:\> $c = Get-DataverseConnection -Url https://myorg.crm11.dynamics.com -UseWAM
-```
-
-Authenticates using Web Account Manager (WAM) on Windows, allowing the user to select a Windows account in the system account picker. Use `-Username` to provide an optional account hint:
-
-```powershell
 PS C:\> $c = Get-DataverseConnection -Url https://myorg.crm11.dynamics.com -UseWAM -Username "user@contoso.com"
 ```
 
-The hint helps WAM identify the intended account but does not restrict the account the user can select.
+Authenticates using Web Account Manager (WAM) on Windows, allowing the user to select an account in the system account picker. The optional `-Username` value hints at the intended account but does not restrict which account can be selected.
 
 ### Example 7
 ```powershell
