@@ -167,9 +167,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     continue;
                 }
 
-                if (!IsBulkMessageSupported(target.LogicalName, request.RequestName))
+                string bulkMessageName = request.RequestName + "Multiple";
+                if (!IsBulkMessageSupported(target.LogicalName, bulkMessageName))
                 {
-                    _writeVerbose($"Bulk message {request.RequestName} is not available for table {target.LogicalName}; using ExecuteMultiple.");
+                    _writeVerbose($"Bulk message {bulkMessageName} is not available for table {target.LogicalName}; using ExecuteMultiple.");
                     executeMultipleItems.Add(batchItems[index]);
                     index++;
                     continue;

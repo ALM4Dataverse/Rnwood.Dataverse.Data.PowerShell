@@ -276,12 +276,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         {
             using var ps = CreatePowerShellWithCmdlets();
             var requests = new List<OrganizationRequest>();
+            string queriedMessageName = null;
             var mockConnection = CreateMockConnection(request =>
             {
                 if (request is RetrieveMultipleRequest retrieveRequest &&
                     retrieveRequest.Query is QueryExpression query &&
                     query.EntityName == "sdkmessagefilter")
                 {
+                    queriedMessageName = query.LinkEntities.Single()
+                        .LinkCriteria.Conditions.Single(condition => condition.AttributeName == "name")
+                        .Values.Single().ToString();
                     var response = new RetrieveMultipleResponse();
                     response.Results["EntityCollection"] = new EntityCollection();
                     return response;
@@ -307,6 +311,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             ps.Invoke(records);
 
             ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.ToString())));
+            queriedMessageName.Should().Be("CreateMultiple");
             requests.OfType<CreateMultipleRequest>().Should().BeEmpty();
             requests.OfType<ExecuteMultipleRequest>().Should().ContainSingle()
                 .Which.Requests.Should().HaveCount(2);

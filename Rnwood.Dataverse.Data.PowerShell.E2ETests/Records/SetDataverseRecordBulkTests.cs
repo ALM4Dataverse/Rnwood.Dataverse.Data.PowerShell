@@ -75,6 +75,7 @@ finally {
         {
             var script = GetConnectionScript(@"
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'Continue'
 $ConfirmPreference = 'None'
 $testRunId = [guid]::NewGuid().ToString('N').Substring(0, 8)
 $timestamp = [DateTime]::UtcNow.ToString('yyyyMMddHHmm')
@@ -95,22 +96,6 @@ try {
     }
     $entityCreated = $true
 
-    $capabilityQuery = [Microsoft.Xrm.Sdk.Query.QueryExpression]::new('sdkmessagefilter')
-    $capabilityQuery.ColumnSet = [Microsoft.Xrm.Sdk.Query.ColumnSet]::new('sdkmessagefilterid')
-    $capabilityQuery.TopCount = 1
-    $capabilityQuery.Criteria.AddCondition(
-        'primaryobjecttypecode',
-        [Microsoft.Xrm.Sdk.Query.ConditionOperator]::Equal,
-        $entityName)
-    $messageLink = $capabilityQuery.AddLink('sdkmessage', 'sdkmessageid', 'sdkmessageid')
-    $messageLink.LinkCriteria.AddCondition(
-        'name',
-        [Microsoft.Xrm.Sdk.Query.ConditionOperator]::Equal,
-        'UpsertMultiple')
-    if ($connection.RetrieveMultiple($capabilityQuery).Entities.Count -eq 0) {
-        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
-    }
-
     $id1 = [guid]::NewGuid()
     $id2 = [guid]::NewGuid()
     $recordIds.Add($id1)
@@ -119,7 +104,11 @@ try {
         @{ Id = $id1; new_name = ""Upsert-$testRunId-1"" }
         @{ Id = $id2; new_name = ""Upsert-$testRunId-2"" }
     )
-    $upserted = @($inputs | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10)
+    $upsertOutput = @($inputs | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10 -Verbose 4>&1)
+    if ($upsertOutput | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like '*UpsertMultiple is not available*' }) {
+        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
+    }
+    $upserted = @($upsertOutput | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] })
     if ($upserted.Count -ne 2 -or [guid]$upserted[0].Id -ne $id1 -or [guid]$upserted[1].Id -ne $id2) {
         throw 'UpsertMultiple did not return the expected response IDs.'
     }
@@ -128,7 +117,11 @@ try {
         @{ Id = $id1; new_name = ""UpdatedUpsert-$testRunId-1"" }
         @{ Id = $id2; new_name = ""UpdatedUpsert-$testRunId-2"" }
     )
-    $upsertedUpdates = @($updates | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10)
+    $upsertedUpdateOutput = @($updates | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10 -Verbose 4>&1)
+    if ($upsertedUpdateOutput | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like '*UpsertMultiple is not available*' }) {
+        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
+    }
+    $upsertedUpdates = @($upsertedUpdateOutput | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] })
     if ($upsertedUpdates.Count -ne 2) {
         throw 'UpsertMultiple did not return one response per updated record.'
     }
