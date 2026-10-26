@@ -1,6 +1,15 @@
 
 # Connection Management
 
+## Web Account Manager (WAM)
+
+On Windows, use `-UseWAM` to authenticate through the Windows account picker. You can pass `-Username` as an optional login hint to help identify the intended account; it does not restrict which account can be selected:
+
+```powershell
+$conn = Get-DataverseConnection -url https://myorg.crm11.dynamics.com -UseWAM -Username "user@contoso.com"
+```
+
+WAM connections can be saved with `-Name` and restored like other named connections.
 
 ## Default Connection
 
@@ -25,6 +34,9 @@ Add the `-Name` parameter when connecting to save the connection:
 ```powershell
 # Interactive authentication - tokens are cached securely
 Get-DataverseConnection -url https://myorg.crm11.dynamics.com -interactive -Name "MyOrgProd"
+
+# Windows Web Account Manager authentication
+Get-DataverseConnection -url https://myorg.crm11.dynamics.com -UseWAM -Name "MyOrgWAM"
 
 # Device code authentication
 Get-DataverseConnection -url https://myorg.crm11.dynamics.com -devicecode -Name "MyOrgDev"
