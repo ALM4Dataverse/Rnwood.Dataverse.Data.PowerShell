@@ -2,6 +2,7 @@
 using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -44,6 +45,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         private const string PARAMSET_CLIENTSECRET = "Authenticate with client secret";
         private const string PARAMSET_CLIENTCERTIFICATE = "Authenticate with client certificate";
         private const string PARAMSET_INTERACTIVE = "Authenticate interactively";
+        private const string PARAMSET_WAM = "Authenticate with Web Account Manager (WAM)";
         private const string PARAMSET_DEVICECODE = "Authenticate using the device code flow";
         private const string PARAMSET_USERNAMEPASSWORD = "Authenticate with username and password";
         private const string PARAMSET_CONNECTIONSTRING = "Authenticate with Dataverse SDK connection string.";
@@ -81,6 +83,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// Gets or sets the name of the connection to save or load.
         /// </summary>
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "Name to save this connection under for later retrieval. Allows you to persist and reuse connections.")]
+        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_WAM, HelpMessage = "Name to save this connection under for later retrieval. Allows you to persist and reuse connections.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_DEVICECODE, HelpMessage = "Name to save this connection under for later retrieval. Allows you to persist and reuse connections.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_USERNAMEPASSWORD, HelpMessage = "Name to save this connection under for later retrieval. Allows you to persist and reuse connections.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_CLIENTSECRET, HelpMessage = "Name to save this connection under for later retrieval. Allows you to persist and reuse connections.")]
@@ -117,6 +120,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         [Parameter(Mandatory = true, ParameterSetName = PARAMSET_CLIENTSECRET, HelpMessage = "Client ID to use for authentication. By default the MS provided ID for PAC CLI is used to make it easy to get started.")]
         [Parameter(Mandatory = true, ParameterSetName = PARAMSET_CLIENTCERTIFICATE, HelpMessage = "Client ID to use for authentication. Required for client certificate authentication.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "Client ID to use for authentication. By default the MS provided ID for PAC CLI is used to make it easy to get started.")]
+        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_WAM, HelpMessage = "Client ID to use for authentication. By default the MS provided ID for PAC CLI is used to make it easy to get started.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_DEVICECODE, HelpMessage = "Client ID to use for authentication. By default the MS provided ID for PAC CLI is used to make it easy to get started.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_USERNAMEPASSWORD, HelpMessage = "Client ID to use for authentication. By default the MS provided ID for PAC CLI is used to make it easy to get started.")]
         public Guid ClientId { get; set; } = new Guid("9cee029c-6210-4654-90bb-17e6e9d36617");
@@ -127,6 +131,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_CLIENTSECRET, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_CLIENTCERTIFICATE, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
+        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_WAM, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_DEVICECODE, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_USERNAMEPASSWORD, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_DEFAULTAZURECREDENTIAL, HelpMessage = "URL of the Dataverse environment to connect to. For example https://myorg.crm11.dynamics.com. If not specified, you will be prompted to select from available environments.")]
@@ -171,9 +176,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public StoreName CertificateStoreName { get; set; } = StoreName.My;
 
         /// <summary>
-        /// Gets or sets the username for authentication.
+        /// Gets or sets the username or optional login hint for interactive authentication.
         /// </summary>
-        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "Username to authenticate with.")]
+        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "Optional username or login hint for interactive authentication.")]
+        [Parameter(Mandatory = false, ParameterSetName = PARAMSET_WAM, HelpMessage = "Optional username or login hint for Web Account Manager (WAM).")]
         [Parameter(Mandatory = false, ParameterSetName = PARAMSET_DEVICECODE, HelpMessage = "Username to authenticate with.")]
         [Parameter(Mandatory = true, ParameterSetName = PARAMSET_USERNAMEPASSWORD, HelpMessage = "Username to authenticate with.")]
         public string Username { get; set; }
@@ -189,6 +195,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         [Parameter(Mandatory = true, ParameterSetName = PARAMSET_INTERACTIVE, HelpMessage = "Triggers interactive authentication, where browser will be opened for user to interactively log in.")]
         public SwitchParameter Interactive { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to use Web Account Manager (WAM) for interactive authentication.
+        /// </summary>
+        [Parameter(Mandatory = true, ParameterSetName = PARAMSET_WAM, HelpMessage = "Authenticates interactively using Web Account Manager (WAM) on Windows.")]
+        public SwitchParameter UseWAM { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use device code authentication.
@@ -304,6 +316,8 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         protected override void ProcessRecord()
         {
+            string savedAuthMethod = null;
+
             // Handle special parameter sets first
             if (ParameterSetName == PARAMSET_GETDEFAULT)
             {
@@ -386,6 +400,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
                 // Restore connection parameters from metadata
                 Url = new Uri(metadata.Url);
+                savedAuthMethod = metadata.AuthMethod;
                 ClientId = string.IsNullOrEmpty(metadata.ClientId) ? ClientId : new Guid(metadata.ClientId);
                 Username = metadata.Username;
                 ManagedIdentityClientId = metadata.ManagedIdentityClientId;
@@ -439,12 +454,28 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                         break;
 
                     case PARAMSET_INTERACTIVE:
+                    case PARAMSET_WAM:
                     case PARAMSET_LOADNAMED:
                         {
-                            var publicClient = PublicClientApplicationBuilder
-                                .Create(ClientId.ToString())
-                                .WithRedirectUri("http://localhost")
-                                .Build();
+                            bool useWam = ParameterSetName == PARAMSET_WAM ||
+                                (ParameterSetName == PARAMSET_LOADNAMED && string.Equals(savedAuthMethod, "WAM", StringComparison.OrdinalIgnoreCase));
+                            if (useWam && Environment.OSVersion.Platform != PlatformID.Win32NT)
+                            {
+                                throw new PlatformNotSupportedException("Web Account Manager (WAM) authentication is only supported on Windows.");
+                            }
+
+                            var publicClientBuilder = PublicClientApplicationBuilder.Create(ClientId.ToString());
+                            if (useWam)
+                            {
+                                publicClientBuilder
+                                    .WithParentActivityOrWindow(GetWamParentWindowHandle)
+                                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+                            }
+                            else
+                            {
+                                publicClientBuilder.WithRedirectUri("http://localhost");
+                            }
+                            var publicClient = publicClientBuilder.Build();
 
                             // Register MSAL cache if saving or loading a named connection
                             if (!string.IsNullOrEmpty(Name))
@@ -469,7 +500,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                 store.SaveConnection(Name, new ConnectionMetadata
                                 {
                                     Url = Url.ToString(),
-                                    AuthMethod = "Interactive",
+                                    AuthMethod = useWam ? "WAM" : "Interactive",
                                     ClientId = ClientId.ToString(),
                                     Username = Username,
                                     SavedAt = DateTime.UtcNow
@@ -1079,6 +1110,33 @@ Url + "/api/data/v9.2/");
             }
         }
 
+        private static IntPtr GetWamParentWindowHandle()
+        {
+            IntPtr consoleHandle = GetConsoleWindow();
+            IntPtr windowHandle = consoleHandle == IntPtr.Zero
+                ? System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle
+                : GetAncestor(consoleHandle, GetAncestorFlags.GetRootOwner);
+            if (windowHandle == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Unable to obtain a parent window handle for Web Account Manager (WAM) authentication.");
+            }
+
+            return windowHandle;
+        }
+
+        private enum GetAncestorFlags
+        {
+            GetParent = 1,
+            GetRoot = 2,
+            GetRootOwner = 3
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", ExactSpelling = true)]
+        private static extern IntPtr GetAncestor(IntPtr windowHandle, GetAncestorFlags flags);
+
         private async Task<string> GetTokenInteractive(IPublicClientApplication app, string url)
         {
             Uri scope = new Uri(new Uri(url), "/.default");
@@ -1106,7 +1164,13 @@ Url + "/api/data/v9.2/");
 
                 if (authResult == null)
                 {
-                    authResult = await app.AcquireTokenInteractive(scopes).ExecuteAsync(cts.Token);
+                    var interactiveRequest = app.AcquireTokenInteractive(scopes);
+                    if (!string.IsNullOrWhiteSpace(Username))
+                    {
+                        interactiveRequest = interactiveRequest.WithLoginHint(Username);
+                    }
+
+                    authResult = await interactiveRequest.ExecuteAsync(cts.Token);
                     Username = authResult.Account.Username;
                 }
 

@@ -146,7 +146,7 @@ Accept wildcard characters: False
 ### -Connection
 Connection to use for discovering environments. If not specified, the default connection is used.
 
-The connection must have been created using an authentication method that supports token providers (Interactive, DeviceCode, ClientSecret, ClientCertificate, DefaultAzureCredential, ManagedIdentity, or AccessToken). Connections created with ConnectionString are not supported.
+The connection must have been created using an authentication method that supports token providers (Interactive, Web Account Manager (WAM), DeviceCode, ClientSecret, ClientCertificate, DefaultAzureCredential, ManagedIdentity, or AccessToken). Connections created with ConnectionString are not supported.
 
 ```yaml
 Type: ServiceClient

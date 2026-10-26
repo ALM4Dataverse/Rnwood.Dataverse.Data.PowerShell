@@ -75,6 +75,30 @@ public class GetDataverseConnectionTests : TestBase, IDisposable
     // ===== Default Connection Management Tests =====
 
     [Fact]
+    public void GetDataverseConnection_UseWAM_IsAvailableAsAnAuthenticationParameterSet()
+    {
+        var parameterAttributes = _cmdletType
+            .GetProperty(nameof(GetDataverseConnectionCmdlet.UseWAM))!
+            .GetCustomAttributes(typeof(ParameterAttribute), false)
+            .Cast<ParameterAttribute>();
+
+        parameterAttributes.Should().ContainSingle(attribute =>
+            attribute.ParameterSetName == "Authenticate with Web Account Manager (WAM)" &&
+            attribute.Mandatory);
+
+        foreach (var parameterName in new[] { "ClientId", "Url", "Username", "Name" })
+        {
+            var attributes = _cmdletType
+                .GetProperty(parameterName)!
+                .GetCustomAttributes(typeof(ParameterAttribute), false)
+                .Cast<ParameterAttribute>();
+
+            attributes.Should().Contain(attribute =>
+                attribute.ParameterSetName == "Authenticate with Web Account Manager (WAM)");
+        }
+    }
+
+    [Fact]
     public void GetDataverseConnection_SetAsDefault_StoresConnectionAsDefault()
     {
         // Arrange
