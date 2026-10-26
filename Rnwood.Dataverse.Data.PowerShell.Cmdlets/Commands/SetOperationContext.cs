@@ -108,6 +108,9 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         public List<(string ColumnName, Guid FileId)> PendingFileUploads { get; } = new List<(string, Guid)>();
 
+        public List<Func<SetOperationContext, SetOperationContext>> DependentOperations { get; } =
+            new List<Func<SetOperationContext, SetOperationContext>>();
+
         /// <summary>
         /// Callbacks to invoke when each request completes successfully.
         /// One callback per request in the Requests list.
@@ -276,6 +279,73 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public void ApplyBypassBusinessLogicExecution(OrganizationRequest request)
         {
             QueryHelpers.ApplyBypassBusinessLogicExecution(request, BypassBusinessLogicExecution, BypassBusinessLogicExecutionStepIds);
+        }
+
+        public SetOperationContext CreateDependentContext()
+        {
+            var context = new SetOperationContext(
+                InputObject,
+                TableName,
+                CallerId,
+                this,
+                MetadataFactory,
+                EntityConverter,
+                Connection,
+                ConversionOptions,
+                _writeVerbose,
+                _writeError,
+                _writeObject,
+                _shouldProcess)
+            {
+                Target = Target,
+                EntityMetadata = EntityMetadata,
+                ExistingRecord = ExistingRecord
+            };
+
+            return context;
+        }
+
+        public void AddAssignmentFollowUp(EntityReference assignee)
+        {
+            DependentOperations.Add(parent =>
+            {
+                var context = parent.CreateDependentContext();
+                var request = new AssignRequest
+                {
+                    Assignee = assignee,
+                    Target = parent.Target.ToEntityReference()
+                };
+                parent.ApplyBypassBusinessLogicExecution(request);
+                context.Requests.Add(request);
+                context.ResponseCompletion = _ =>
+                    parent.WriteVerboseMessage($"Record {parent.Target.LogicalName}:{parent.Target.Id} assigned to {assignee.Name}");
+                return context;
+            });
+        }
+
+        public void AddSetStateFollowUp(OptionSetValue state, OptionSetValue status)
+        {
+            DependentOperations.Add(parent =>
+            {
+                var context = parent.CreateDependentContext();
+                var request = new SetStateRequest
+                {
+                    EntityMoniker = parent.Target.ToEntityReference(),
+                    State = state,
+                    Status = status
+                };
+                parent.ApplyBypassBusinessLogicExecution(request);
+                context.Requests.Add(request);
+                context.ResponseCompletion = _ =>
+                    parent.WriteVerboseMessage(
+                        $"Record {parent.Target.LogicalName}:{parent.Target.Id} status set to State:{state.Value} Status: {status.Value}");
+                return context;
+            });
+        }
+
+        public void WriteVerboseMessage(string message)
+        {
+            _writeVerbose(message);
         }
 
         /// <summary>
@@ -540,6 +610,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public void UpsertCompletion(Entity targetUpdate, UpsertResponse response)
         {
             targetUpdate.Id = response.Target.Id;
+            Target.Id = response.Target.Id;
+            if (EntityMetadata?.PrimaryIdAttribute != null)
+            {
+                Target[EntityMetadata.PrimaryIdAttribute] = response.Target.Id;
+            }
 
             SetIdProperty(InputObject, targetUpdate.Id);
 

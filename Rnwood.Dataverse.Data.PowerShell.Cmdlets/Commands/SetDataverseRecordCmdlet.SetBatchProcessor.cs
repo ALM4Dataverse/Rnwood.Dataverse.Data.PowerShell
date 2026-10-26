@@ -78,7 +78,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         public void Flush()
         {
-            if (_nextBatchItems.Count > 0)
+            while (_nextBatchItems.Count > 0)
             {
                 ExecuteBatch();
             }
@@ -363,13 +363,23 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             }
         }
 
-        private static void InvokeCompletion(SetOperationContext context, OrganizationResponse response)
+        private void InvokeCompletion(SetOperationContext context, OrganizationResponse response)
         {
             if (context.ResponseCompletions != null &&
                 context.ResponseCompletions.Count > 0 &&
                 context.ResponseCompletions[0] != null)
             {
                 context.ResponseCompletions[0](response);
+            }
+
+            QueueDependentOperations(context);
+        }
+
+        private void QueueDependentOperations(SetOperationContext context)
+        {
+            foreach (var createDependentOperation in context.DependentOperations)
+            {
+                QueueOperation(createDependentOperation(context));
             }
         }
 
@@ -459,6 +469,10 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                     if (hasError && !handledError)
                     {
                         HandleBatchException(new List<SetOperationContext> { context }, firstError);
+                    }
+                    else
+                    {
+                        QueueDependentOperations(context);
                     }
                 }
             }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using AwesomeAssertions;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
@@ -172,6 +173,59 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             created["firstname"].Should().Be("Upsert");
             created["lastname"].Should().Be("Insert");
             created["emailaddress1"].Should().Be("upsert.insert@test.com");
+        }
+
+        [Fact]
+        public void SetDataverseRecord_Upsert_UsesResolvedIdForOwnerFollowUp()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var ownerId = Guid.NewGuid();
+
+            Guid assignedTargetId = Guid.Empty;
+            OrganizationResponse? Interceptor(OrganizationRequest request)
+            {
+                if (request is AssignRequest assignRequest)
+                {
+                    assignedTargetId = assignRequest.Target.Id;
+                }
+                else if (request is ExecuteMultipleRequest executeMultipleRequest)
+                {
+                    assignedTargetId = executeMultipleRequest.Requests
+                        .OfType<AssignRequest>()
+                        .Select(assignRequest => assignRequest.Target.Id)
+                        .FirstOrDefault();
+                }
+
+                return UpsertRequestInterceptor(request);
+            }
+
+            var mockConnection = CreateMockConnectionWithAlternateKeys(
+                "contact",
+                "emailaddress1_key",
+                new[] { "emailaddress1" },
+                Interceptor);
+            Service!.Create(new Entity("systemuser") { Id = ownerId, ["fullname"] = "Upsert Owner" });
+
+            var newRecord = PSObject.AsPSObject(new
+            {
+                firstname = "AlternateKey",
+                lastname = "Owner",
+                emailaddress1 = "alternate.owner@test.com",
+                ownerid = ownerId
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("Upsert", true)
+              .AddParameter("MatchOn", new[] { new[] { "emailaddress1" } })
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(new[] { newRecord });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error.Select(e => e.ToString())));
+            assignedTargetId.Should().NotBe(Guid.Empty);
+            var assigned = Service.Retrieve("contact", assignedTargetId, new ColumnSet("ownerid"));
+            assigned.GetAttributeValue<EntityReference>("ownerid").Id.Should().Be(ownerId);
         }
 
         [Fact]

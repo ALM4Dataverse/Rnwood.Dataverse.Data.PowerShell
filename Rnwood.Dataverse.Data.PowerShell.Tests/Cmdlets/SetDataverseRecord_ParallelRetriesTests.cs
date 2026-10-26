@@ -111,6 +111,45 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             created.Entities.Count.Should().BeLessThan(2);
         }
 
+        [Fact]
+        public void SetDataverseRecord_SerialRetries_RetriesLegacyUpsertInExecuteMultiple()
+        {
+            var simulator = new TransientFailureSimulator(1, TransientFailureSimulator.ContainsCreateOrUpdate);
+            var capturedRequests = new List<OrganizationRequest>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                capturedRequests.Add(request);
+                return simulator.Intercept(request);
+            }, "contact");
+            using var ps = CreatePowerShellWithCmdlets();
+
+            var recordId = Guid.NewGuid();
+            var record = PSObject.AsPSObject(new
+            {
+                Id = recordId,
+                firstname = "LegacyUpsertRetry",
+                lastname = "User"
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("Upsert", true)
+              .AddParameter("UseExecuteMultiple", true)
+              .AddParameter("BatchSize", 10)
+              .AddParameter("Retries", 1)
+              .AddParameter("InitialRetryDelay", 0);
+
+            ps.Invoke(new[] { record });
+
+            ps.HadErrors.Should().BeFalse(string.Join(" | ", ps.Streams.Error.Select(e => e.ToString())));
+            capturedRequests.OfType<ExecuteMultipleRequest>().Should().HaveCount(2);
+            capturedRequests.OfType<ExecuteMultipleRequest>()
+                .Should().OnlyContain(request => request.Requests.OfType<UpsertRequest>().Count() == 1);
+            var created = Service!.Retrieve("contact", recordId, new ColumnSet(true));
+            created.GetAttributeValue<string>("firstname").Should().Be("LegacyUpsertRetry");
+        }
+
         // Note: The main parallel functionality tests (without retry simulation) 
         // are in SetDataverseRecord_ParallelExecutionTests.cs and work with FakeXrmEasy
     }

@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Threading;
 using AwesomeAssertions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
@@ -347,6 +349,44 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             var executeMultipleIndex = requestNames.IndexOf("ExecuteMultiple");
             createMultipleIndex.Should().BeGreaterThanOrEqualTo(0);
             executeMultipleIndex.Should().BeGreaterThan(createMultipleIndex);
+        }
+
+        [Fact]
+        public void SetDataverseRecord_Parallel_BulkCreateCompletesBeforeStatusChange()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requestNames = new ConcurrentQueue<string>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requestNames.Enqueue(request.RequestName);
+                if (request.RequestName == "CreateMultiple")
+                {
+                    Thread.Sleep(250);
+                }
+
+                return null;
+            }, "contact");
+
+            var newRecord = PSObject.AsPSObject(new
+            {
+                firstname = "Parallel",
+                lastname = "Status",
+                statuscode = 2
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 10)
+              .AddParameter("MaxDegreeOfParallelism", 2);
+            ps.Invoke(new[] { newRecord });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            var names = requestNames.ToArray();
+            Array.IndexOf(names, "CreateMultiple").Should().BeGreaterThanOrEqualTo(0);
+            Array.IndexOf(names, "ExecuteMultiple").Should().BeGreaterThan(Array.IndexOf(names, "CreateMultiple"));
+            Service!.RetrieveMultiple(new Microsoft.Xrm.Sdk.Query.QueryExpression("contact"))
+                .Entities.Should().ContainSingle();
         }
     }
 }

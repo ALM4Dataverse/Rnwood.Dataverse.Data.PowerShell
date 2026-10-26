@@ -78,7 +78,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
 
             if (request is ExecuteMultipleRequest em)
             {
-                return em.Requests?.Any(r => r is CreateRequest || r is UpdateRequest) == true;
+                return em.Requests?.Any(r => r is CreateRequest || r is UpdateRequest || r is UpsertRequest) == true;
             }
 
             return false;

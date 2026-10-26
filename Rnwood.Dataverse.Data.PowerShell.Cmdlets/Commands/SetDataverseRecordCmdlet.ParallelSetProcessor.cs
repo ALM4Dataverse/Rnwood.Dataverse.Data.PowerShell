@@ -226,6 +226,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                             workerContext.Target = originalContext.Target;
                             workerContext.EntityMetadata = originalContext.EntityMetadata;
                             workerContext.ExistingRecord = originalContext.ExistingRecord;
+                            workerContext.DependentOperations.AddRange(originalContext.DependentOperations);
                             
                             // Rebuild the requests and callbacks with the worker's output methods
                             // This ensures callbacks use the queued write methods instead of the original ones
@@ -285,6 +286,8 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                                 workerContext.ResponseCompletions[i](response);
                                             }
                                         }
+
+                                        QueueDependentOperations(workerContext);
                                         
                                         success = true;
                                         
@@ -403,6 +406,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             while (_errorQueue.TryDequeue(out var err)) _writeError(err);
             while (_progressQueue.TryDequeue(out var pr)) _writeProgress(pr);
             while (_outputQueue.TryDequeue(out var obj)) _writeObject(obj);
+        }
+
+        private void QueueDependentOperations(SetOperationContext context)
+        {
+            foreach (var createDependentOperation in context.DependentOperations)
+            {
+                QueueOperation(createDependentOperation(context));
+            }
         }
     }
 }
