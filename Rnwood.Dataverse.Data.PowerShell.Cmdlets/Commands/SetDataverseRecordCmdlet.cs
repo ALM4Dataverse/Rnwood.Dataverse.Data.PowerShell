@@ -38,10 +38,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public string TableName { get; set; }
 
         /// <summary>
-        /// Controls the maximum number of requests sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable batching.
+        /// Controls the maximum number of records sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable batching.
         /// </summary>
-        [Parameter(HelpMessage = "Controls the maximum number of requests sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable.")]
+        [Parameter(HelpMessage = "Controls the maximum number of records sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable.")]
         public uint BatchSize { get; set; } = 100;
+
+        /// <summary>
+        /// If specified, uses ExecuteMultipleRequest for batched operations instead of the CreateMultiple, UpdateMultiple, and UpsertMultiple messages.
+        /// </summary>
+        [Parameter(HelpMessage = "Uses ExecuteMultipleRequest for batched operations instead of the CreateMultiple, UpdateMultiple, and UpsertMultiple messages.")]
+        public SwitchParameter UseExecuteMultiple { get; set; }
 
         /// <summary>
         /// Controls the maximum number of records to retrieve in a single query when checking for existing records. Default is 500. Specify 1 to retrieve one record at a time.
@@ -108,9 +114,9 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         [Parameter(HelpMessage = "If specified, no check for existing record is made and records will always be attempted to be created. Use this option when it's known that no existing matching records will exist to improve performance. See the -noupdate option for an alternative.")]
         public SwitchParameter CreateOnly { get; set; }
         /// <summary>
-        /// If specified, upsert request will be used to create/update existing records as appropriate. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.
+        /// If specified, upsert request will be used to create/update existing records as appropriate. Batched operations use UpsertMultipleRequest. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.
         /// </summary>
-        [Parameter(HelpMessage = "If specified, upsert request will be used to create/update existing records as appropriate. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.")]
+        [Parameter(HelpMessage = "If specified, upsert request will be used to create/update existing records as appropriate. Batched operations use UpsertMultipleRequest. With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.")]
         public SwitchParameter Upsert { get; set; }
         /// <summary>
         /// Hashset mapping lookup column names in the target entity to column names in the referred-to table for resolving lookup references.
@@ -176,6 +182,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         bool ISetOperationParameters.NoCreate => NoCreate.IsPresent;
         bool ISetOperationParameters.CreateOnly => CreateOnly.IsPresent;
         bool ISetOperationParameters.Upsert => Upsert.IsPresent;
+        bool ISetOperationParameters.UseExecuteMultiple => UseExecuteMultiple.IsPresent;
         bool ISetOperationParameters.PassThru => PassThru.IsPresent;
         bool ISetOperationParameters.UpdateAllColumns => UpdateAllColumns.IsPresent;
         CustomLogicBypassableOrganizationServiceCmdlet.BusinessLogicTypes[] ISetOperationParameters.BypassBusinessLogicExecution => BypassBusinessLogicExecution;
@@ -235,6 +242,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 _parallelProcessor = new ParallelSetProcessor(
                     MaxDegreeOfParallelism,
                     BatchSize,
+                    UseExecuteMultiple.IsPresent,
                     Connection,
                     WriteVerbose,
                     WriteError,
@@ -251,6 +259,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 // Initialize the batch processor
                 _setBatchProcessor = new SetBatchProcessor(
                     BatchSize,
+                    UseExecuteMultiple.IsPresent,
                     Connection,
                     WriteVerbose,
                     ShouldProcess,
@@ -495,7 +504,13 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         }
 
 
-        private bool UpsertRecord(PSObject inputObject, string tableName, Guid? callerId, EntityMetadata entityMetadata, Entity target)
+        private bool UpsertRecord(
+            PSObject inputObject,
+            string tableName,
+            Guid? callerId,
+            EntityMetadata entityMetadata,
+            Entity target,
+            Action<SetOperationContext> configureContext = null)
         {
             bool result = true;
 
@@ -527,9 +542,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 throw;
             }
 
+            configureContext?.Invoke(context);
+
             // If no requests were created, return early
             if (context.Requests.Count == 0)
             {
+                QueueDeferredFollowUps(context);
                 return result;
             }
 
@@ -598,7 +616,13 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
 
         
-        private void CreateNewRecord(PSObject inputObject, string tableName, Guid? callerId, EntityMetadata entityMetadata, Entity target)
+        private void CreateNewRecord(
+            PSObject inputObject,
+            string tableName,
+            Guid? callerId,
+            EntityMetadata entityMetadata,
+            Entity target,
+            Action<SetOperationContext> configureContext = null)
         {
             // Create context for this operation
             var context = new SetOperationContext(
@@ -619,10 +643,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
             // Let context build the request and set up callbacks
             context.CreateNewRecord();
+            configureContext?.Invoke(context);
 
             // If no requests were created (e.g., NoCreate is set), return early
             if (context.Requests.Count == 0)
             {
+                QueueDeferredFollowUps(context);
                 return;
             }
 
@@ -674,7 +700,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             }
         }
 
-        private void UpdateExistingRecord(PSObject inputObject, string tableName, Guid? callerId, EntityMetadata entityMetadata, Entity target, Entity existingRecord)
+        private void UpdateExistingRecord(
+            PSObject inputObject,
+            string tableName,
+            Guid? callerId,
+            EntityMetadata entityMetadata,
+            Entity target,
+            Entity existingRecord,
+            Action<SetOperationContext> configureContext = null)
         {
             // Create context for this operation
             var context = new SetOperationContext(
@@ -696,10 +729,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
 
             // Let context build the request and set up callbacks
             context.UpdateExistingRecord();
+            configureContext?.Invoke(context);
 
             // If no requests were created (e.g., NoUpdate is set or no changes), return early
             if (context.Requests.Count == 0)
             {
+                QueueDeferredFollowUps(context);
                 return;
             }
 
@@ -764,20 +799,30 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         private void ProcessRecordWithExistingRecord(PSObject inputObject, string tableName, Guid? callerId, Entity target, EntityMetadata entityMetadata, Entity existingRecord)
         {
             // This is the original processing logic from ProcessRecord, after GetExistingRecord
+            bool deferFollowUps = _parallelProcessor != null || _setBatchProcessor != null;
+            Action<SetOperationContext> configureContext = deferFollowUps
+                ? context => AddDeferredFollowUps(context, target, entityMetadata, existingRecord)
+                : null;
+
             if (Upsert.IsPresent)
             {
-                UpsertRecord(inputObject, tableName, callerId, entityMetadata, target);
+                UpsertRecord(inputObject, tableName, callerId, entityMetadata, target, configureContext);
             }
             else
             {
                 if (existingRecord != null)
                 {
-                    UpdateExistingRecord(inputObject, tableName, callerId, entityMetadata, target, existingRecord);
+                    UpdateExistingRecord(inputObject, tableName, callerId, entityMetadata, target, existingRecord, configureContext);
                 }
                 else
                 {
-                    CreateNewRecord(inputObject, tableName, callerId, entityMetadata, target);
+                    CreateNewRecord(inputObject, tableName, callerId, entityMetadata, target, configureContext);
                 }
+            }
+
+            if (deferFollowUps)
+            {
+                return;
             }
 
             // Handle assignment and status changes
@@ -901,6 +946,58 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private void AddDeferredFollowUps(
+            SetOperationContext context,
+            Entity target,
+            EntityMetadata entityMetadata,
+            Entity existingRecord)
+        {
+            if (!((existingRecord != null && !NoUpdate) || (existingRecord == null && !NoCreate)))
+            {
+                return;
+            }
+
+            if (target.Contains("ownerid"))
+            {
+                context.AddAssignmentFollowUp(target.GetAttributeValue<EntityReference>("ownerid"));
+            }
+
+            if (target.Contains("statecode") || target.Contains("statuscode"))
+            {
+                OptionSetValue statuscode = target.GetAttributeValue<OptionSetValue>("statuscode") ?? new OptionSetValue(-1);
+                OptionSetValue stateCode = target.GetAttributeValue<OptionSetValue>("statecode");
+
+                if (stateCode == null)
+                {
+                    StatusAttributeMetadata statusMetadata =
+                        (StatusAttributeMetadata)entityMetadata.Attributes.First(
+                            a => a.LogicalName.Equals("statuscode", StringComparison.OrdinalIgnoreCase));
+
+                    stateCode = new OptionSetValue(statusMetadata.OptionSet.Options.Cast<StatusOptionMetadata>()
+                            .First(o => o.Value.Value == statuscode.Value)
+                            .State.Value);
+                }
+
+                context.AddSetStateFollowUp(stateCode, statuscode);
+            }
+        }
+
+        private void QueueDeferredFollowUps(SetOperationContext context)
+        {
+            foreach (var createDependentOperation in context.DependentOperations)
+            {
+                var dependentContext = createDependentOperation(context);
+                if (_parallelProcessor != null)
+                {
+                    _parallelProcessor.QueueOperation(dependentContext);
+                }
+                else if (_setBatchProcessor != null)
+                {
+                    _setBatchProcessor.QueueOperation(dependentContext);
                 }
             }
         }

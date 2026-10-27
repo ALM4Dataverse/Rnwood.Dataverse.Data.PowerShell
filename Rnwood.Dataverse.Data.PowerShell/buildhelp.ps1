@@ -44,7 +44,17 @@ if ($previousHash -eq $currentHash) {
 
 # Ensure PlatyPs is available
 if (-not (Get-InstalledModule PlatyPs -MinimumVersion 0.14.1 -ErrorAction SilentlyContinue)) {
-    Install-Module -Scope CurrentUser PlatyPs -Force
+    $installAttempts = 5
+    for ($attempt = 1; $attempt -le $installAttempts; $attempt++) {
+        try {
+            Install-Module -Scope CurrentUser PlatyPs -Force -ErrorAction Stop
+            break
+        } catch {
+            if ($attempt -eq $installAttempts) { throw }
+            Write-Warning "Failed to install PlatyPS on attempt $attempt; retrying after a short delay."
+            Start-Sleep -Seconds (5 * $attempt)
+        }
+    }
 }
 
 # Remove existing generated help only when we are going to regenerate

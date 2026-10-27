@@ -186,15 +186,28 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
             var fakeService = env.CreateOrganizationService(_mockUserId);
             fakeService.BusinessUnitId = _mockBusinessUnitId;
 
-            // If there's a custom interceptor, wrap the service
-            if (requestInterceptor != null)
+            Service = new MockOrganizationServiceWithInterceptor(fakeService, request =>
             {
-                Service = new MockOrganizationServiceWithInterceptor(fakeService, requestInterceptor);
-            }
-            else
-            {
-                Service = fakeService;
-            }
+                var interceptedResponse = requestInterceptor?.Invoke(request);
+                if (interceptedResponse != null)
+                {
+                    return interceptedResponse;
+                }
+
+                if (request is RetrieveMultipleRequest retrieveMultipleRequest &&
+                    retrieveMultipleRequest.Query is QueryExpression query &&
+                    string.Equals(query.EntityName, "sdkmessagefilter", StringComparison.OrdinalIgnoreCase))
+                {
+                    var response = new RetrieveMultipleResponse();
+                    response.Results["EntityCollection"] = new EntityCollection
+                    {
+                        Entities = { new Entity("sdkmessagefilter") }
+                    };
+                    return response;
+                }
+
+                return null;
+            });
 
             // Create CloneableMockServiceClient that supports cloning for parallel operations
             var httpClient = new HttpClient(new FakeHttpMessageHandler());

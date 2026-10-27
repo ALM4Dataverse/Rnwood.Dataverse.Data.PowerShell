@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Threading;
 using AwesomeAssertions;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 using Rnwood.Dataverse.Data.PowerShell.Commands;
 using Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure;
 using Xunit;
@@ -315,6 +319,153 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
             
             // Assert
             ps.HadErrors.Should().BeFalse();
+        }
+
+        [Fact]
+        public void SetDataverseRecord_BulkCreateRunsStatusChangeInFollowingExecuteMultipleBatch()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requestNames = new List<string>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requestNames.Add(request.RequestName);
+                return null;
+            }, "contact");
+
+            var newRecord = PSObject.AsPSObject(new
+            {
+                firstname = "Bulk",
+                lastname = "Status",
+                statuscode = 2
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(new[] { newRecord });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            var createMultipleIndex = requestNames.IndexOf("CreateMultiple");
+            var executeMultipleIndex = requestNames.IndexOf("ExecuteMultiple");
+            createMultipleIndex.Should().BeGreaterThanOrEqualTo(0);
+            executeMultipleIndex.Should().BeGreaterThan(createMultipleIndex);
+        }
+
+        [Fact]
+        public void SetDataverseRecord_Parallel_BulkCreateCompletesBeforeStatusChange()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var requestNames = new ConcurrentQueue<string>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                requestNames.Enqueue(request.RequestName);
+                if (request.RequestName == "CreateMultiple")
+                {
+                    Thread.Sleep(250);
+                }
+
+                return null;
+            }, "contact");
+
+            var newRecord = PSObject.AsPSObject(new
+            {
+                firstname = "Parallel",
+                lastname = "Status",
+                statuscode = 2
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 10)
+              .AddParameter("MaxDegreeOfParallelism", 2);
+            ps.Invoke(new[] { newRecord });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            var names = requestNames.ToArray();
+            Array.IndexOf(names, "CreateMultiple").Should().BeGreaterThanOrEqualTo(0);
+            Array.IndexOf(names, "ExecuteMultiple").Should().BeGreaterThan(Array.IndexOf(names, "CreateMultiple"));
+            Service!.RetrieveMultiple(new Microsoft.Xrm.Sdk.Query.QueryExpression("contact"))
+                .Entities.Should().ContainSingle();
+        }
+
+        [Fact]
+        public void SetDataverseRecord_Parallel_BatchSizeOneWaitsForOwnerFollowUp()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var ownerId = Guid.NewGuid();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                if (request is CreateRequest)
+                {
+                    Thread.Sleep(250);
+                }
+
+                return null;
+            }, "contact", "systemuser");
+            Service!.Create(new Entity("systemuser") { Id = ownerId, ["fullname"] = "Parallel Owner" });
+
+            var record = PSObject.AsPSObject(new
+            {
+                firstname = "Parallel",
+                lastname = "Owner",
+                ownerid = ownerId
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("BatchSize", 1)
+              .AddParameter("MaxDegreeOfParallelism", 2);
+            ps.Invoke(new[] { record });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            var created = Service.RetrieveMultiple(new Microsoft.Xrm.Sdk.Query.QueryExpression("contact")
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("ownerid")
+            }).Entities.Should().ContainSingle().Which;
+            created.GetAttributeValue<EntityReference>("ownerid").Id.Should().Be(ownerId);
+        }
+
+        [Fact]
+        public void SetDataverseRecord_AllowMultipleMatches_CapturesEachFollowUpTarget()
+        {
+            using var ps = CreatePowerShellWithCmdlets();
+            var ownerId = Guid.NewGuid();
+            var assignedIds = new ConcurrentBag<Guid>();
+            var mockConnection = CreateMockConnection(request =>
+            {
+                if (request is AssignRequest assignRequest)
+                {
+                    assignedIds.Add(assignRequest.Target.Id);
+                }
+
+                return null;
+            }, "contact", "systemuser");
+            Service!.Create(new Entity("systemuser") { Id = ownerId, ["fullname"] = "Match Owner" });
+            var recordIds = new[]
+            {
+                Service.Create(new Entity("contact") { ["firstname"] = "First", ["lastname"] = "Match" }),
+                Service.Create(new Entity("contact") { ["firstname"] = "Second", ["lastname"] = "Match" })
+            };
+
+            var input = PSObject.AsPSObject(new
+            {
+                lastname = "Match",
+                ownerid = ownerId
+            });
+
+            ps.AddCommand("Set-DataverseRecord")
+              .AddParameter("Connection", mockConnection)
+              .AddParameter("TableName", "contact")
+              .AddParameter("MatchOn", new[] { "lastname" })
+              .AddParameter("AllowMultipleMatches", true)
+              .AddParameter("BatchSize", 10);
+            ps.Invoke(new[] { input });
+
+            ps.HadErrors.Should().BeFalse(string.Join("; ", ps.Streams.Error));
+            assignedIds.Should().BeEquivalentTo(recordIds);
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
     {
         private readonly int _maxDegreeOfParallelism;
         private readonly uint _batchSize;
+        private readonly bool _useExecuteMultiple;
         private readonly ServiceClient _connection;
         private readonly Action<string> _writeVerbose;
         private readonly Action<ErrorRecord> _writeError;
@@ -42,6 +43,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         public ParallelSetProcessor(
             int maxDegreeOfParallelism,
             uint batchSize,
+            bool useExecuteMultiple,
             ServiceClient connection,
             Action<string> writeVerbose,
             Action<ErrorRecord> writeError,
@@ -55,6 +57,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             _maxDegreeOfParallelism = maxDegreeOfParallelism;
             _batchSize = batchSize;
+            _useExecuteMultiple = useExecuteMultiple;
             _connection = connection;
             _writeVerbose = writeVerbose;
             _writeError = writeError;
@@ -80,14 +83,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         /// </summary>
         public void QueueOperation(SetOperationContext context)
         {
+            QueueOperationCore(context);
+
+            // Drain queues to write any pending outputs
+            DrainQueues();
+        }
+
+        private void QueueOperationCore(SetOperationContext context)
+        {
             _workQueue.Enqueue(context);
             Interlocked.Increment(ref _totalQueuedCount);
 
             // Start worker tasks if we have work and capacity
             EnsureWorkersStarted();
-
-            // Drain queues to write any pending outputs
-            DrainQueues();
         }
 
         /// <summary>
@@ -97,27 +105,35 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         {
             _inputComplete = true;
 
-            // Give workers a chance to pick up remaining work
-            while (!_workQueue.IsEmpty && !_isStopping() && !_cancellationToken.IsCancellationRequested)
+            while (!_isStopping() && !_cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(50);
+                List<Task> tasksToWait;
+                lock (_tasksLock)
+                {
+                    _activeTasks.RemoveAll(task => task.IsCompleted);
+                    tasksToWait = new List<Task>(_activeTasks);
+                }
+
+                if (tasksToWait.Count > 0)
+                {
+                    Task.WaitAll(tasksToWait.ToArray());
+                }
+
+                lock (_tasksLock)
+                {
+                    _activeTasks.RemoveAll(task => task.IsCompleted);
+                    if (_workQueue.IsEmpty && _activeTasks.Count == 0)
+                    {
+                        break;
+                    }
+                }
+
+                EnsureWorkersStarted();
                 DrainQueues();
             }
 
-            List<Task> tasksToWait;
-            lock (_tasksLock)
-            {
-                tasksToWait = new List<Task>(_activeTasks);
-            }
-
-            _verboseQueue.Enqueue($"Waiting for {tasksToWait.Count} parallel tasks to complete...");
+            _verboseQueue.Enqueue($"Waiting for parallel operations to complete...");
             DrainQueues();
-
-            // Wait for all active tasks to complete
-            if (tasksToWait.Count > 0)
-            {
-                Task.WaitAll(tasksToWait.ToArray());
-            }
 
             // Drain any remaining outputs
             DrainQueues();
@@ -185,6 +201,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                 {
                     batchProcessor = new SetBatchProcessor(
                         _batchSize,
+                        _useExecuteMultiple,
                         workerConnection,
                         (msg) => _verboseQueue.Enqueue(msg),
                         (target) => true, // Always return true - ShouldProcess was already called
@@ -222,6 +239,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                             workerContext.Target = originalContext.Target;
                             workerContext.EntityMetadata = originalContext.EntityMetadata;
                             workerContext.ExistingRecord = originalContext.ExistingRecord;
+                            workerContext.DependentOperations.AddRange(originalContext.DependentOperations);
                             
                             // Rebuild the requests and callbacks with the worker's output methods
                             // This ensures callbacks use the queued write methods instead of the original ones
@@ -278,9 +296,22 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
                                             // Call completion callback for this request
                                             if (workerContext.ResponseCompletions != null && i < workerContext.ResponseCompletions.Count && workerContext.ResponseCompletions[i] != null)
                                             {
-                                                workerContext.ResponseCompletions[i](response);
+                                                try
+                                                {
+                                                    workerContext.ResponseCompletions[i](response);
+                                                }
+                                                catch (Exception completionException)
+                                                {
+                                                    _errorQueue.Enqueue(new ErrorRecord(
+                                                        completionException,
+                                                        null,
+                                                        ErrorCategory.InvalidResult,
+                                                        originalContext.InputObject));
+                                                }
                                             }
                                         }
+
+                                        QueueDependentOperations(workerContext);
                                         
                                         success = true;
                                         
@@ -399,6 +430,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             while (_errorQueue.TryDequeue(out var err)) _writeError(err);
             while (_progressQueue.TryDequeue(out var pr)) _writeProgress(pr);
             while (_outputQueue.TryDequeue(out var obj)) _writeObject(obj);
+        }
+
+        private void QueueDependentOperations(SetOperationContext context)
+        {
+            foreach (var createDependentOperation in context.DependentOperations)
+            {
+                QueueOperationCore(createDependentOperation(context));
+            }
         }
     }
 }

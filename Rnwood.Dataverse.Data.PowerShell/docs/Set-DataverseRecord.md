@@ -16,7 +16,7 @@ Creates or updates Dataverse records including M:M association/disassociation, s
 Set-DataverseRecord -InputObject <PSObject> -TableName <String> [-BatchSize <UInt32>]
  [-RetrievalBatchSize <UInt32>] [-IgnoreProperties <String[]>] [-Id <Guid>] [-MatchOn <String[][]>]
  [-AllowMultipleMatches] [-PassThru] [-NoUpdate] [-NoCreate] [-NoUpdateColumns <String[]>] [-CallerId <Guid>]
- [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-LookupColumns <Hashtable>] [-NoLookup]
+ [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-UseExecuteMultiple] [-LookupColumns <Hashtable>] [-NoLookup]
  [-BypassBusinessLogicExecution <BusinessLogicTypes[]>] [-BypassBusinessLogicExecutionStepIds <Guid[]>]
  [-Retries <Int32>] [-InitialRetryDelay <Int32>] [-MaxDegreeOfParallelism <Int32>] [-EnableDuplicateDetection]
  [-FileDirectory <String>] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
@@ -55,11 +55,13 @@ Party list columns accept a collection of objects each of which need to be conve
 
 **Batch Operations:**
 
-When multiple records are passed through the pipeline or provided in a single invocation, this cmdlet automatically uses `ExecuteMultipleRequest` to batch operations for improved performance. 
+When multiple records are passed through the pipeline or provided in a single invocation, this cmdlet automatically batches operations for improved performance. By default, it uses `CreateMultipleRequest`, `UpdateMultipleRequest`, or `UpsertMultipleRequest` for supported record operations.
 
 Key Batch Behavior:
 - Default batch size is 100 records per request (configurable via `-BatchSize` parameter)
 - Set `-BatchSize 1` to disable batching and send one request at a time
+- Use `-UseExecuteMultiple` to use the legacy `ExecuteMultipleRequest` batching behavior instead
+- Assignment and state/status changes are sent after the bulk create/update/upsert request in a separate `ExecuteMultipleRequest`
 - Batching continues on error - all operations are attempted and errors are reported at the end
 - Each error includes the input record for correlation
 - For best performance with `-CallerId`, sort records by caller ID since a new batch is needed when the caller changes
@@ -94,7 +96,7 @@ See Example 20 and Example 21 in the EXAMPLES section for usage demonstrations.
 The cmdlet follows this decision logic for each record:
 
 1. **With `-Upsert` switch:**
-   - Uses `UpsertRequest` which lets Dataverse decide based on alternate keys
+   - Uses `UpsertMultipleRequest` for batched operations (or `UpsertRequest` with `-UseExecuteMultiple` or `-BatchSize 1`)
    - No check for existing record is performed
    - Dataverse creates if no match, updates if match found
    - `-MatchOn` must specify an alternate key defined on the table
@@ -134,7 +136,7 @@ If the input object contains an `ownerid` property the cmdlet will perform an as
 
 **Setting state/status**
 
-To change a record's state/status include `statuscode` (and optionally `statecode`) on the input object. `statuscode` and `statecode` accept either the numeric value or the display label. If only `statuscode` is provided the cmdlet will infer the matching `statecode` from the table metadata and then issue a `SetStateRequest` after the main create/update. State/status requests are executed separately and are batched when `-BatchSize` &gt; 1.
+To change a record's state/status include `statuscode` (and optionally `statecode`) on the input object. `statuscode` and `statecode` accept either the numeric value or the display label. If only `statuscode` is provided the cmdlet will infer the matching `statecode` from the table metadata and then issue a `SetStateRequest` after the main create/update. With bulk messages, state/status requests are sent afterward in a separate `ExecuteMultipleRequest`.
 
 ## EXAMPLES
 
@@ -172,7 +174,7 @@ PS C:\> $contacts = @(
 PS C:\> $contacts | Set-DataverseRecord -TableName contact -CreateOnly
 ```
 
-Creates multiple contact records in a single batch. The `-CreateOnly` switch improves performance by skipping the existence check since we know these are new records. By default, all 3 records will be sent in a single ExecuteMultipleRequest.
+Creates multiple contact records in a single batch. The `-CreateOnly` switch improves performance by skipping the existence check since we know these are new records. By default, all 3 records will be sent in a single `CreateMultipleRequest`.
 
 ### Example 4: Batch update with choice columns
 ```powershell
@@ -221,7 +223,7 @@ PS C:\> $records = 1..500 | ForEach-Object {
 PS C:\> $records | Set-DataverseRecord -TableName account -BatchSize 50 -CreateOnly
 ```
 
-Creates 500 records in batches of 50. This will result in 10 ExecuteMultipleRequest calls, each containing 50 CreateRequest operations.
+Creates 500 records in batches of 50 using 10 `CreateMultipleRequest` calls.
 
 ### Example 8: Disable batching for detailed error handling
 ```powershell
@@ -252,7 +254,7 @@ PS C:\> Get-DataverseRecord -TableName account -Top 100 |
     Set-DataverseRecord
 ```
 
-Reassigns 100 accounts to a new owner. The cmdlet handles this as update operations followed by AssignRequest operations, all batched together.
+Reassigns 100 accounts to a new owner. The cmdlet sends the updates in bulk, then performs assignments in a separate `ExecuteMultipleRequest`.
 
 ### Example 11: Using lookup columns with names
 ```powershell
@@ -453,7 +455,7 @@ PS C:\> $records = 1..10000 | ForEach-Object {
 PS C:\> $records | Set-DataverseRecord -TableName contact -CreateOnly -MaxDegreeOfParallelism 4 -BatchSize 100 -Verbose
 ```
 
-Processes 10,000 records using 4 parallel worker threads. Each worker maintains its own batch of 100 records. This results in multiple ExecuteMultipleRequest operations running concurrently for maximum throughput. The `-Verbose` flag shows worker activity and progress across all threads.
+Processes 10,000 records using 4 parallel worker threads. Each worker maintains its own batch of 100 records. This results in multiple bulk message operations running concurrently for maximum throughput. The `-Verbose` flag shows worker activity and progress across all threads.
 
 ### Example 21: Parallel updates with MatchOn
 ```powershell
@@ -536,7 +538,7 @@ Accept wildcard characters: False
 ```
 
 ### -BatchSize
-Controls the maximum number of requests sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable.
+Controls the maximum number of records sent to Dataverse in one batch (where possible) to improve throughput. Specify 1 to disable.
 
 When value is 1, requests are sent to Dataverse one request at a time. When > 1, batching is used. 
 
@@ -550,6 +552,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseExecuteMultiple
+If specified, uses the legacy `ExecuteMultipleRequest` batching behavior instead of the `CreateMultipleRequest`, `UpdateMultipleRequest`, and `UpsertMultipleRequest` messages.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -962,7 +979,7 @@ Accept wildcard characters: False
 ```
 
 ### -Upsert
-If specified, upsert request will be used to create/update existing records as appropriate.
+If specified, upsert request will be used to create/update existing records as appropriate. Batched operations use `UpsertMultipleRequest`.
 With this option, -MatchOn must specify a single alternate key defined on the table. It is not supported for many-to-many intersect entities.
 
 ```yaml

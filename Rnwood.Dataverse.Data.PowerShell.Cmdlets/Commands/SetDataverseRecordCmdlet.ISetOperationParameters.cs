@@ -48,6 +48,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
         bool Upsert { get; }
 
         /// <summary>
+        /// Gets a value indicating whether to use ExecuteMultiple instead of the bulk messages.
+        /// </summary>
+        bool UseExecuteMultiple { get; }
+
+        /// <summary>
         /// Gets a value indicating whether to pass through the input object with Id set.
         /// </summary>
         bool PassThru { get; }
