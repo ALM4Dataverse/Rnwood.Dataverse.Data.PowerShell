@@ -330,20 +330,7 @@ jobs:
             $releaseNotesText | Out-File -FilePath release-notes.txt -Encoding utf8
           }
 
-          $buildAttempts = 3
-          for ($attempt = 1; $attempt -le $buildAttempts; $attempt++) {
-            dotnet build -c Release ./Rnwood.Dataverse.Data.PowerShell/Rnwood.Dataverse.Data.PowerShell.csproj
-            if ($LASTEXITCODE -eq 0) {
-              break
-            }
-
-            if ($attempt -eq $buildAttempts) {
-              throw "Module build failed after $buildAttempts attempts with exit code $LASTEXITCODE"
-            }
-
-            Write-Warning "Module build failed on attempt $attempt; retrying after a short delay."
-            Start-Sleep -Seconds (5 * $attempt)
-          }
+          dotnet build -c Release ./Rnwood.Dataverse.Data.PowerShell/Rnwood.Dataverse.Data.PowerShell.csproj
           if (test-path out/Rnwood.Dataverse.Data.PowerShell) {
             remove-item -force -recurse out/Rnwood.Dataverse.Data.PowerShell
           }
