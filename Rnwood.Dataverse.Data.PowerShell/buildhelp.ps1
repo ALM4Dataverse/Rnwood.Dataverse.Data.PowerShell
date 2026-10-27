@@ -44,7 +44,7 @@ if ($previousHash -eq $currentHash) {
 
 # Ensure PlatyPs is available
 if (-not (Get-InstalledModule PlatyPs -MinimumVersion 0.14.1 -ErrorAction SilentlyContinue)) {
-    $installAttempts = 3
+    $installAttempts = 5
     for ($attempt = 1; $attempt -le $installAttempts; $attempt++) {
         try {
             Install-Module -Scope CurrentUser PlatyPs -Force -ErrorAction Stop

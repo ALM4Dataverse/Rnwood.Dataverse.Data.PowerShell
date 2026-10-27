@@ -9,7 +9,7 @@ $outdir=$OutDir.Trim('""')
 
 
 if (-not(get-installedmodule Platyps -MinimumVersion 0.14.1 -ErrorAction silentlycontinue)) {
-	$installAttempts = 3
+	$installAttempts = 5
 	for ($attempt = 1; $attempt -le $installAttempts; $attempt++) {
 		try {
 			install-module -scope CurrentUser PlatyPs -force -ErrorAction Stop
