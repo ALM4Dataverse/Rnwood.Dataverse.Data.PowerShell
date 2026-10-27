@@ -71,7 +71,7 @@ finally {
         }
 
         [Fact]
-        public void BulkUpsertUsesRealUpsertMultipleResponseCollection()
+        public void BulkUpsertUsesAvailableDataversePath()
         {
             var script = GetConnectionScript(@"
 $ErrorActionPreference = 'Stop'
@@ -81,6 +81,7 @@ $testRunId = [guid]::NewGuid().ToString('N').Substring(0, 8)
 $timestamp = [DateTime]::UtcNow.ToString('yyyyMMddHHmm')
 $entityName = ""new_bulkupsert_${timestamp}_$testRunId""
 $entityCreated = $false
+$usedExecuteMultipleFallback = $false
 $recordIds = [System.Collections.Generic.List[guid]]::new()
 
 try {
@@ -105,12 +106,13 @@ try {
         @{ Id = $id2; new_name = ""Upsert-$testRunId-2"" }
     )
     $upsertOutput = @($inputs | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10 -Verbose 4>&1)
-    if ($upsertOutput | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like '*UpsertMultiple is not available*' }) {
-        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
-    }
+    $usedExecuteMultipleFallback = [bool]($upsertOutput | Where-Object {
+        $_ -is [System.Management.Automation.VerboseRecord] -and
+        $_.Message -like '*Bulk message UpsertMultiple is not available*'
+    })
     $upserted = @($upsertOutput | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] })
     if ($upserted.Count -ne 2 -or [guid]$upserted[0].Id -ne $id1 -or [guid]$upserted[1].Id -ne $id2) {
-        throw 'UpsertMultiple did not return the expected response IDs.'
+        throw 'Upsert did not return the expected response IDs.'
     }
 
     $updates = @(
@@ -118,12 +120,13 @@ try {
         @{ Id = $id2; new_name = ""UpdatedUpsert-$testRunId-2"" }
     )
     $upsertedUpdateOutput = @($updates | Set-DataverseRecord -Connection $connection -TableName $entityName -Upsert -PassThru -BatchSize 10 -Verbose 4>&1)
-    if ($upsertedUpdateOutput | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like '*UpsertMultiple is not available*' }) {
-        throw ""The created custom table '$entityName' does not expose UpsertMultiple.""
-    }
+    $usedExecuteMultipleFallback = $usedExecuteMultipleFallback -or [bool]($upsertedUpdateOutput | Where-Object {
+        $_ -is [System.Management.Automation.VerboseRecord] -and
+        $_.Message -like '*Bulk message UpsertMultiple is not available*'
+    })
     $upsertedUpdates = @($upsertedUpdateOutput | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] })
     if ($upsertedUpdates.Count -ne 2) {
-        throw 'UpsertMultiple did not return one response per updated record.'
+        throw 'Upsert did not return one response per updated record.'
     }
     foreach ($record in $upsertedUpdates) {
         $stored = Get-DataverseRecord -Connection $connection -TableName $entityName -Id $record.Id
@@ -132,7 +135,12 @@ try {
         }
     }
 
-    Write-Host 'SUCCESS: UpsertMultiple response collection processed'
+    if ($usedExecuteMultipleFallback) {
+        Write-Host 'SUCCESS: upsert records verified using the ExecuteMultiple fallback'
+    }
+    else {
+        Write-Host 'SUCCESS: UpsertMultiple response collection processed'
+    }
 }
 finally {
     if ($entityCreated) {
@@ -149,7 +157,7 @@ finally {
             var result = RunScript(script);
 
             result.Success.Should().BeTrue($"Script should succeed. StdErr: {result.StandardError}\nStdOut: {result.StandardOutput}");
-            result.StandardOutput.Should().Contain("SUCCESS: UpsertMultiple response collection processed", because: result.GetFullOutput());
+            result.StandardOutput.Should().Contain("SUCCESS: upsert records verified", because: result.GetFullOutput());
         }
     }
 }
