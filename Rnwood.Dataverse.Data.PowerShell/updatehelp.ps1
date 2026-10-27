@@ -9,7 +9,17 @@ $outdir=$OutDir.Trim('""')
 
 
 if (-not(get-installedmodule Platyps -MinimumVersion 0.14.1 -ErrorAction silentlycontinue)) {
-	install-module -scope CurrentUser PlatyPs -force
+	$installAttempts = 3
+	for ($attempt = 1; $attempt -le $installAttempts; $attempt++) {
+		try {
+			install-module -scope CurrentUser PlatyPs -force -ErrorAction Stop
+			break
+		} catch {
+			if ($attempt -eq $installAttempts) { throw }
+			Write-Warning "Failed to install PlatyPS on attempt $attempt; retrying after a short delay."
+			Start-Sleep -Seconds (5 * $attempt)
+		}
+	}
 }
 
 $modulepath = "$outdir/Rnwood.Dataverse.Data.PowerShell.psd1"
