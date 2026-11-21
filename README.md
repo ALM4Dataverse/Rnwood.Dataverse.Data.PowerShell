@@ -6,6 +6,8 @@ A PowerShell module for connecting to Microsoft Dataverse (used by Dynamics 365 
 
 This module works in PowerShell Desktop and PowerShell Core, supporting Windows, Linux, and macOS.
 
+PowerShell 7.4 or later is supported on Windows, Linux, and macOS; Windows PowerShell 5.1 is supported on Windows. CI currently tests PowerShell 5.1, 7.4.14, 7.5.5, 7.6.0, and 7.7.0 on the platforms listed in the [compatibility guide](docs/getting-started/module-compatibility.md). That guide also documents tested companion-module versions and troubleshooting steps for assembly-loading conflicts.
+
 ## Features
 
 - Creating, updating, upserting and deleting records, including M:M records
@@ -81,6 +83,7 @@ For more advanced scenarios including metadata and customisations, see the [docu
 - [Installation](docs/getting-started/installation.md) - How to install and update the module
 - [Quick Start Guide](docs/getting-started/quickstart.md) - Basic operations and PowerShell best practices
 - [Authentication Methods](docs/getting-started/authentication.md) - All supported authentication methods
+- [PowerShell and Module Compatibility](docs/getting-started/module-compatibility.md) - Supported and tested PowerShell versions, companion-module constraints, and troubleshooting
 
 ### Core Concepts
 - [Connection Management](docs/core-concepts/connections.md) - Getting connected, default connections, named connections
