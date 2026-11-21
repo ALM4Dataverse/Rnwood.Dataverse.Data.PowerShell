@@ -257,6 +257,66 @@ Write-Host ""SUCCESS: all SDK assemblies loaded from cmdlets/$expectedTfm/""
             because: $"Script should exit cleanly.\nFull output:\n{result.GetFullOutput()}");
     }
 
+    [Fact]
+    public void Module_ServiceClientSharesLoggingAbstractionsWithDefaultLoadContext()
+    {
+        EnsureModulePath();
+
+        var script = @"
+$runtimeMajor = [Environment]::Version.Major
+$expectedTfm = if ($runtimeMajor -ge 10) { ""net$runtimeMajor.0"" }
+               elseif ($runtimeMajor -eq 9) { ""net9.0"" }
+               else { ""net8.0"" }
+
+$moduleRoot = Split-Path -Parent $moduleManifest
+$tfmFolder = Join-Path $moduleRoot ""cmdlets/$expectedTfm""
+if (-not (Test-Path $tfmFolder)) {
+    $expectedTfm = ""net8.0""
+    $tfmFolder = Join-Path $moduleRoot ""cmdlets/$expectedTfm""
+}
+
+$loggingPath = Join-Path $tfmFolder 'Microsoft.Extensions.Logging.Abstractions.dll'
+$defaultLogging = [System.Runtime.Loader.AssemblyLoadContext]::Default.Assemblies |
+    Where-Object { $_.GetName().Name -eq 'Microsoft.Extensions.Logging.Abstractions' } |
+    Select-Object -First 1
+if (-not $defaultLogging) {
+    $defaultLogging = [System.Runtime.Loader.AssemblyLoadContext]::Default.LoadFromAssemblyPath($loggingPath)
+}
+
+Import-Module $moduleManifest -Force -ErrorAction Stop
+$cmdletsAssembly = [System.Runtime.Loader.AssemblyLoadContext]::Default.Assemblies |
+    Where-Object { $_.GetName().Name -eq 'Rnwood.Dataverse.Data.PowerShell.Cmdlets' } |
+    Select-Object -First 1
+$cmdletType = $cmdletsAssembly.GetType('Rnwood.Dataverse.Data.PowerShell.Commands.GetDataverseEnvironmentCmdlet', $true)
+$serviceClientType = $cmdletType.GetProperty('Connection').PropertyType
+$discoverMethod = $serviceClientType.GetMethods() |
+    Where-Object { $_.Name -eq 'DiscoverOnlineOrganizationsAsync' } |
+    Select-Object -First 1
+if (-not $discoverMethod) {
+    throw 'ServiceClient.DiscoverOnlineOrganizationsAsync was not found'
+}
+
+$loggerType = $discoverMethod.GetParameters() |
+    Where-Object { $_.ParameterType.FullName -eq 'Microsoft.Extensions.Logging.ILogger' } |
+    Select-Object -ExpandProperty ParameterType -First 1
+if (-not $loggerType) {
+    throw 'DiscoverOnlineOrganizationsAsync ILogger parameter was not found'
+}
+if (-not [object]::ReferenceEquals($loggerType.Assembly, $defaultLogging)) {
+    throw ""ServiceClient uses a different Microsoft.Extensions.Logging.Abstractions assembly than the default context""
+}
+
+Write-Host 'SUCCESS: ServiceClient shares Microsoft.Extensions.Logging.Abstractions with the default context'
+";
+
+        var result = PowerShellProcessRunner.Run(script, usePowerShellCore: true, timeoutSeconds: 120, importModule: false);
+
+        result.StandardOutput.Should().Contain("SUCCESS",
+            because: $"ServiceClient should share logging abstractions with the default context.\nFull output:\n{result.GetFullOutput()}");
+        result.Success.Should().BeTrue(
+            because: $"Script should exit cleanly.\nFull output:\n{result.GetFullOutput()}");
+    }
+
     private static void EnsureModulePath()
     {
         // Check if TESTMODULEPATH is already set (e.g., by CI)
