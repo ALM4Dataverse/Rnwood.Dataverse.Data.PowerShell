@@ -9,9 +9,18 @@ namespace Rnwood.Dataverse.Data.PowerShell.E2ETests.Module
         private const string CommonModuleImports = @"
 Import-Module PackageManagement -Force -ErrorAction Stop
 Import-Module PowerShellGet -Force -ErrorAction Stop
+Import-Module Az.Accounts -Force -ErrorAction Stop
+Import-Module Az.Resources -Force -ErrorAction Stop
+
+if ($PSVersionTable.PSEdition -eq 'Core') {
+    Import-Module PnP.PowerShell -Force -ErrorAction Stop
+}
+else {
+    Import-Module Microsoft.Online.SharePoint.PowerShell -Force -ErrorAction Stop
+}
 ";
 
-        [Fact]
+        [SkippableFact]
         [CrossPlatformTest]
         public void DataverseModule_WhoAmI_WorksWhenImportedAfterCommonModules()
         {
@@ -21,7 +30,7 @@ Import-Module PowerShellGet -Force -ErrorAction Stop
                 because: result.GetFullOutput());
         }
 
-        [Fact]
+        [SkippableFact]
         [CrossPlatformTest]
         public void DataverseModule_WhoAmI_WorksWhenImportedBeforeCommonModules()
         {

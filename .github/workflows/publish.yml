@@ -69,6 +69,24 @@ jobs:
         uses: PSModule/install-powershell@v1
         with:
           Version: ${{ matrix.powershell_version }}
+      - name: Install common modules for module load-order tests
+        shell: pwsh
+        run: |
+          $modulePath = Join-Path $env:RUNNER_TEMP "InteropModules"
+          New-Item -ItemType Directory -Force -Path $modulePath | Out-Null
+
+          Save-Module -Name Az.Accounts -RequiredVersion 5.5.5 -Path $modulePath -Force
+          Save-Module -Name Az.Resources -RequiredVersion 10.2.3 -Path $modulePath -Force
+
+          if ("${{ matrix.powershell_version }}" -eq "5") {
+            Save-Module -Name Microsoft.Online.SharePoint.PowerShell -RequiredVersion 16.0.27814.12015 -Path $modulePath -Force
+          }
+          else {
+            Save-Module -Name PnP.PowerShell -RequiredVersion 3.5.0 -Path $modulePath -Force
+          }
+
+          $env:PSModulePath = "$modulePath$([IO.Path]::PathSeparator)$env:PSModulePath"
+          Add-Content -Path $env:GITHUB_ENV -Value "PSModulePath=$env:PSModulePath"
       - if: ${{ matrix.test_set == 'e2e-minimal' || matrix.test_set == 'e2e-full' }}
         name: Install Azure Functions Core Tools (for AzureFunctionsCompatibilityTests)
         shell: bash
