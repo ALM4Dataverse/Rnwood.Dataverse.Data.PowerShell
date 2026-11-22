@@ -9,14 +9,14 @@ namespace Rnwood.Dataverse.Data.PowerShell.E2ETests.Module
         private const string CommonModuleImports = @"
 Import-Module PackageManagement -Force -ErrorAction Stop
 Import-Module PowerShellGet -Force -ErrorAction Stop
-Import-Module Az.Accounts -Force -ErrorAction Stop
-Import-Module Az.Resources -Force -ErrorAction Stop
+Import-Module Az.Accounts -RequiredVersion 5.5.0 -Force -ErrorAction Stop
+Import-Module Az.Resources -RequiredVersion 9.1.0 -Force -ErrorAction Stop
 
 if ($PSVersionTable.PSEdition -eq 'Core') {
-    Import-Module PnP.PowerShell -Force -ErrorAction Stop
+    Import-Module PnP.PowerShell -RequiredVersion 3.5.0 -Force -ErrorAction Stop
 }
 else {
-    Import-Module Microsoft.Online.SharePoint.PowerShell -Force -ErrorAction Stop
+    Import-Module Microsoft.Online.SharePoint.PowerShell -RequiredVersion 16.0.27814.12015 -Force -ErrorAction Stop
 }
 ";
 

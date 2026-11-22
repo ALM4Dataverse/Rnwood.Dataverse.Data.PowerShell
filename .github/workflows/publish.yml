@@ -78,6 +78,12 @@ jobs:
           Save-Module -Name Az.Accounts -RequiredVersion 5.5.0 -Path $modulePath -Force
           Save-Module -Name Az.Resources -RequiredVersion 9.1.0 -Path $modulePath -Force
 
+          # Saving Az.Resources also saves a newer Az.Accounts dependency. Keep only the
+          # explicitly tested version so unqualified dependency discovery cannot select it.
+          Get-ChildItem (Join-Path $modulePath "Az.Accounts") -Directory |
+            Where-Object { $_.Name -ne "5.5.0" } |
+            Remove-Item -Recurse -Force
+
           if ("${{ matrix.powershell_version }}" -eq "5") {
             Save-Module -Name Microsoft.Online.SharePoint.PowerShell -RequiredVersion 16.0.27814.12015 -Path $modulePath -Force
           }

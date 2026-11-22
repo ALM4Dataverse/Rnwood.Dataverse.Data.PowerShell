@@ -186,9 +186,11 @@ namespace Rnwood.Dataverse.Data.PowerShell.FrameworkSpecific.Loader
                     return null;
                 }
 
-                // Microsoft.Extensions assemblies may already be loaded by the PowerShell host.
-                // Reuse those assemblies to keep types such as ILogger consistent across contexts.
-                if (assemblyName.Name != null && assemblyName.Name.StartsWith("Microsoft.Extensions.", StringComparison.OrdinalIgnoreCase))
+                // ILogger is part of the cmdlet-facing API, so keep its type identity shared
+                // with the default context. Other Microsoft.Extensions assemblies are client
+                // implementation dependencies and must use the versions bundled with Dataverse;
+                // host modules may have loaded incompatible versions into the default context.
+                if (string.Equals(assemblyName.Name, "Microsoft.Extensions.Logging.Abstractions", StringComparison.OrdinalIgnoreCase))
                 {
                     return null;
                 }

@@ -317,6 +317,73 @@ Write-Host 'SUCCESS: ServiceClient shares Microsoft.Extensions.Logging.Abstracti
             because: $"Script should exit cleanly.\nFull output:\n{result.GetFullOutput()}");
     }
 
+    [Fact]
+    public void Module_ServiceClientUsesBundledOptionsWhenDefaultContextHasOptionsLoaded()
+    {
+        EnsureModulePath();
+
+        var script = @"
+$runtimeMajor = [Environment]::Version.Major
+$expectedTfm = if ($runtimeMajor -ge 10) { ""net$runtimeMajor.0"" }
+               elseif ($runtimeMajor -eq 9) { ""net9.0"" }
+               else { ""net8.0"" }
+
+$moduleRoot = Split-Path -Parent $moduleManifest
+$tfmFolder = Join-Path $moduleRoot ""cmdlets/$expectedTfm""
+if (-not (Test-Path $tfmFolder)) {
+    $tfmFolder = Join-Path $moduleRoot 'cmdlets/net8.0'
+}
+
+$optionsPath = Join-Path $tfmFolder 'Microsoft.Extensions.Options.dll'
+$defaultOptions = [System.Runtime.Loader.AssemblyLoadContext]::Default.Assemblies |
+    Where-Object { $_.GetName().Name -eq 'Microsoft.Extensions.Options' } |
+    Select-Object -First 1
+if (-not $defaultOptions) {
+    $defaultOptions = [System.Runtime.Loader.AssemblyLoadContext]::Default.LoadFromAssemblyPath($optionsPath)
+}
+
+Import-Module $moduleManifest -Force -ErrorAction Stop
+$cmdletsAssembly = [System.Runtime.Loader.AssemblyLoadContext]::Default.Assemblies |
+    Where-Object { $_.GetName().Name -eq 'Rnwood.Dataverse.Data.PowerShell.Cmdlets' } |
+    Select-Object -First 1
+$cmdletType = $cmdletsAssembly.GetType('Rnwood.Dataverse.Data.PowerShell.Commands.GetDataverseEnvironmentCmdlet', $true)
+$serviceClientType = $cmdletType.GetProperty('Connection').PropertyType
+$clientContext = [System.Runtime.Loader.AssemblyLoadContext]::GetLoadContext($serviceClientType.Assembly)
+$clientOptions = $clientContext.LoadFromAssemblyName([System.Reflection.AssemblyName]::new('Microsoft.Extensions.Options'))
+
+if ([object]::ReferenceEquals($clientOptions, $defaultOptions)) {
+    throw 'ServiceClient resolved Microsoft.Extensions.Options from the default context instead of its bundled dependencies'
+}
+if ([System.IO.Path]::GetFullPath($clientOptions.Location) -ne [System.IO.Path]::GetFullPath($optionsPath)) {
+    throw ""ServiceClient loaded Microsoft.Extensions.Options from '$($clientOptions.Location)' instead of '$optionsPath'""
+}
+
+$optionsExtensions = $clientOptions.GetType('Microsoft.Extensions.DependencyInjection.OptionsServiceCollectionExtensions', $true)
+$serviceCollectionType = $clientContext.LoadFromAssemblyName([System.Reflection.AssemblyName]::new('Microsoft.Extensions.DependencyInjection.Abstractions')).GetType('Microsoft.Extensions.DependencyInjection.IServiceCollection', $true)
+$addOptions = $optionsExtensions.GetMethods() |
+    Where-Object {
+        $_.Name -eq 'AddOptions' -and
+        $_.IsGenericMethod -and
+        $_.ReturnType.Name -eq 'OptionsBuilder`1' -and
+        $_.GetParameters().Length -eq 1 -and
+        $_.GetParameters()[0].ParameterType -eq $serviceCollectionType
+    } |
+    Select-Object -First 1
+if (-not $addOptions) {
+    throw 'The bundled Options assembly does not expose the expected AddOptions API'
+}
+
+Write-Host 'SUCCESS: ServiceClient uses bundled Microsoft.Extensions.Options'
+";
+
+        var result = PowerShellProcessRunner.Run(script, usePowerShellCore: true, timeoutSeconds: 120, importModule: false);
+
+        result.StandardOutput.Should().Contain("SUCCESS",
+            because: $"ServiceClient should use its bundled options dependencies.\nFull output:\n{result.GetFullOutput()}");
+        result.Success.Should().BeTrue(
+            because: $"Script should exit cleanly.\nFull output:\n{result.GetFullOutput()}");
+    }
+
     private static void EnsureModulePath()
     {
         // Check if TESTMODULEPATH is already set (e.g., by CI)
