@@ -38,6 +38,12 @@ Retrieves attribute (column) metadata from Dataverse.
 ### [Get-DataverseCanvasApp](Get-DataverseCanvasApp.md)
 Retrieves Canvas apps from a Dataverse environment.
 
+### [Get-DataverseCloudFlow](Get-DataverseCloudFlow.md)
+Retrieves cloud flow information from a Dataverse environment.
+
+### [Get-DataverseCloudFlowAction](Get-DataverseCloudFlowAction.md)
+Retrieves actions from a cloud flow in Dataverse.
+
 ### [Get-DataverseComponentDependency](Get-DataverseComponentDependency.md)
 Retrieves component dependencies in Dataverse.
 
@@ -211,6 +217,12 @@ Deletes an attribute (column) from a Dataverse entity.
 ### [Remove-DataverseCanvasApp](Remove-DataverseCanvasApp.md)
 Removes a Canvas app from a Dataverse environment.
 
+### [Remove-DataverseCloudFlow](Remove-DataverseCloudFlow.md)
+Removes (deletes) a cloud flow from Dataverse.
+
+### [Remove-DataverseCloudFlowAction](Remove-DataverseCloudFlowAction.md)
+Removes an action from a cloud flow in Dataverse.
+
 ### [Remove-DataverseConnectionReference](Remove-DataverseConnectionReference.md)
 Removes a connection reference from a Dataverse environment.
 
@@ -315,6 +327,12 @@ Creates or updates an attribute (column) in Dataverse.
 
 ### [Set-DataverseCanvasApp](Set-DataverseCanvasApp.md)
 Creates or updates a Canvas app in a Dataverse environment.
+
+### [Set-DataverseCloudFlow](Set-DataverseCloudFlow.md)
+Creates or updates a cloud flow in Dataverse.
+
+### [Set-DataverseCloudFlowAction](Set-DataverseCloudFlowAction.md)
+Creates or updates an action within a cloud flow in Dataverse.
 
 ### [Set-DataverseConnectionAsDefault](Set-DataverseConnectionAsDefault.md)
 Sets the specified Dataverse connection as the default connection for cmdlets that don't specify a connection.

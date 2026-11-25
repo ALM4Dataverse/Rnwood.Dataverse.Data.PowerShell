@@ -9,6 +9,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.E2ETests.Solution
     /// Solution component manipulation tests against a real Dataverse environment.
     /// Converted from e2e-tests/SolutionComponent.Tests.ps1
     /// </summary>
+    [Collection(SchemaChangesCollection.Name)]
     public class SolutionComponentTests : E2ETestBase
     {
         [Fact]
