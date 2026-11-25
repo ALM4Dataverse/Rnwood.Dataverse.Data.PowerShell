@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <metadata minClientVersion="4.0">
+    <id>Rnwood.Dataverse.Data.PowerShell</id>
+    <version>$version$</version>
+    <authors>Rob Wood</authors>
+    <owners>Rob Wood</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Dataverse data manipulation cmdlets</description>
+    <projectUrl>https://github.com/rnwood/Rnwood.Dataverse.Data.PowerShell</projectUrl>
+    <license type="expression">MIT</license>
+    <tags>PowerShell Dataverse Dynamics 365</tags>
+  </metadata>
+  <files>
+    <file src="out/Rnwood.Dataverse.Data.PowerShell/**/*" target="." />
+  </files>
+</package>
