@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Json.Schema;
 using YamlDotNet.Core;
@@ -73,7 +74,6 @@ public static partial class YamlFirstPackaging
 
         var options = new EvaluationOptions
         {
-            EvaluateAs = SpecVersion.Draft7,
             OutputFormat = OutputFormat.List,
         };
 
@@ -102,7 +102,8 @@ public static partial class YamlFirstPackaging
                 continue;
             }
 
-            var result = schema.Evaluate(node, options);
+            using var document = JsonDocument.Parse(node.ToJsonString());
+            var result = schema.Evaluate(document.RootElement, options);
             if (!result.IsValid)
             {
                 CollectSchemaErrors(result, path, allIssues);
@@ -121,7 +122,11 @@ public static partial class YamlFirstPackaging
 
         if (result.Errors is { Count: > 0 })
         {
-            var location = result.InstanceLocation?.ToString() ?? "/";
+            var location = result.InstanceLocation.ToString();
+            if (string.IsNullOrEmpty(location))
+            {
+                location = "/";
+            }
             foreach (var (keyword, message) in result.Errors)
             {
                 issues.Add($"[{filePath}] at {location}: {keyword} - {message}");
