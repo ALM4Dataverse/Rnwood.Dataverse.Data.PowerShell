@@ -1,4 +1,4 @@
-using SharpYaml.Serialization;
+using SharpYaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -226,20 +226,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             try
             {
                 // Parse the screen content YAML
-                var serializer = new Serializer();
-                var screenContent = serializer.Deserialize(yamlContent);
+                var screenContent = YamlSerializer.Deserialize<object>(yamlContent);
 
                 // Create the full structure: Screens -> ScreenName -> content
-                var fullStructure = new Dictionary<object, object>
+                var fullStructure = new Dictionary<string, object?>
                 {
-                    ["Screens"] = new Dictionary<object, object>
+                    ["Screens"] = new Dictionary<string, object?>
                     {
                         [screenName] = screenContent
                     }
                 };
 
                 // Serialize with proper indentation
-                var result = serializer.Serialize(fullStructure);
+                var result = YamlSerializer.Serialize(fullStructure);
                 return result;
             }
             catch (Exception ex)

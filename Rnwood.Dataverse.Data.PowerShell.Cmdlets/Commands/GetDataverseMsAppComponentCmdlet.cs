@@ -1,5 +1,5 @@
 using ICSharpCode.SharpZipLib.Zip;
-using SharpYaml.Serialization;
+using SharpYaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -156,17 +156,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             try
             {
                 // Parse YAML using SharpYaml
-                var serializer = new Serializer();
-                var yamlObject = serializer.Deserialize(yamlContent);
+                var yamlObject = YamlSerializer.Deserialize<object>(yamlContent);
 
                 // Expected structure: { ComponentDefinitions: { ComponentName: { ... properties ... } } }
-                if (yamlObject is Dictionary<object, object> root &&
+                if (yamlObject is Dictionary<string, object?> root &&
                     root.TryGetValue("ComponentDefinitions", out var componentsObj) &&
-                    componentsObj is Dictionary<object, object> components &&
+                    componentsObj is Dictionary<string, object?> components &&
                     components.TryGetValue(componentName, out var componentContent))
                 {
                     // Serialize just the component content without the header
-                    var contentYaml = serializer.Serialize(componentContent);
+                    var contentYaml = YamlSerializer.Serialize(componentContent);
                     return contentYaml;
                 }
 

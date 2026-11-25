@@ -1,4 +1,4 @@
-using SharpYaml.Serialization;
+using SharpYaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -221,20 +221,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             try
             {
                 // Parse the component content YAML
-                var serializer = new Serializer();
-                var componentContent = serializer.Deserialize(yamlContent);
+                var componentContent = YamlSerializer.Deserialize<object>(yamlContent);
 
                 // Create the full structure: ComponentDefinitions -> ComponentName -> content
-                var fullStructure = new Dictionary<object, object>
+                var fullStructure = new Dictionary<string, object?>
                 {
-                    ["ComponentDefinitions"] = new Dictionary<object, object>
+                    ["ComponentDefinitions"] = new Dictionary<string, object?>
                     {
                         [componentName] = componentContent
                     }
                 };
 
                 // Serialize with proper indentation
-                var result = serializer.Serialize(fullStructure);
+                var result = YamlSerializer.Serialize(fullStructure);
                 return result;
             }
             catch (Exception ex)

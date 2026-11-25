@@ -1,4 +1,4 @@
-using SharpYaml.Serialization;
+using SharpYaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -186,17 +186,16 @@ namespace Rnwood.Dataverse.Data.PowerShell.Commands
             try
             {
                 // Parse the app properties content YAML
-                var serializer = new Serializer();
-                var appContent = serializer.Deserialize(yamlContent);
+                var appContent = YamlSerializer.Deserialize<object>(yamlContent);
 
                 // Create the full structure: App -> content
-                var fullStructure = new Dictionary<object, object>
+                var fullStructure = new Dictionary<string, object?>
                 {
                     ["App"] = appContent
                 };
 
                 // Serialize with proper indentation
-                var result = serializer.Serialize(fullStructure);
+                var result = YamlSerializer.Serialize(fullStructure);
                 return result;
             }
             catch (Exception ex)
