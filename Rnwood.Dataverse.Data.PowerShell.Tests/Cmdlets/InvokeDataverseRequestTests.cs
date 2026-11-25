@@ -25,7 +25,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_BatchesMultipleRequests_WithBatchSize5_ReturnsAllResponses()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -62,7 +62,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_BatchSize1_NoBatching_ReturnsAllResponses()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -97,7 +97,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_EmptyPipeline_DoesNotThrow()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -128,7 +128,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PathStartingWithSlashApi_ThrowsValidationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -178,7 +178,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PathStartingWithApi_ThrowsValidationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -228,7 +228,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PathStartingWithSlashAPICaseInsensitive_ThrowsValidationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -278,7 +278,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PathStartingWithAPICaseInsensitive_ThrowsValidationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -376,7 +376,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_EntityReferenceInHashtable_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -412,7 +412,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_OptionSetValueInHashtable_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -448,7 +448,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_MultipleSDKObjectsInHashtable_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -489,7 +489,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_NullValuesInParameters_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -525,7 +525,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PrimitiveTypesInParameters_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -563,7 +563,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_MoneyValueInParameters_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -599,7 +599,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_PSCustomObjectInParameters_DoesNotThrowPSObjectSerializationError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -638,7 +638,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_RequestParameterSet_ReturnsRawOrganizationResponse()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 
@@ -671,7 +671,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseRequest_BatchingWithRequestParameterSet_DoesNotConvertResponses()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseRequest", typeof(InvokeDataverseRequestCmdlet), null));
 

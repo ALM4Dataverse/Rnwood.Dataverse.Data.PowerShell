@@ -25,7 +25,7 @@ public class MiscellaneousCmdletsTests : TestBase
 {
     private PS CreatePowerShellWithMiscCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseConnectionReference", typeof(GetDataverseConnectionReferenceCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

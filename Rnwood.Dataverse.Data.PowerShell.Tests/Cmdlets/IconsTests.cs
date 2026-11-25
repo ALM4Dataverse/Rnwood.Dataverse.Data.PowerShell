@@ -26,7 +26,7 @@ public class IconsTests : TestBase
 
     private static PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseIconSetIcon", typeof(GetDataverseIconSetIconCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

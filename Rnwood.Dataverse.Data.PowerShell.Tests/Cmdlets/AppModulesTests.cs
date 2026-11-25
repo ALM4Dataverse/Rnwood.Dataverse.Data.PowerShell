@@ -28,7 +28,7 @@ public class AppModulesTests : TestBase
 {
     private PS CreatePowerShellWithAppModuleCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Get-DataverseAppModule", typeof(GetDataverseAppModuleCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

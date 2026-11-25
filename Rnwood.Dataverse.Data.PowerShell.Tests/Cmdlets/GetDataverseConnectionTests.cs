@@ -48,7 +48,7 @@ public class GetDataverseConnectionTests : TestBase, IDisposable
     /// </summary>
     private static PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
 
         // Register GetDataverseConnectionCmdlet with its alias
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

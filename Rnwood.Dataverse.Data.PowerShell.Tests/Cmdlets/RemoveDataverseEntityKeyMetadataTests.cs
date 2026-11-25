@@ -28,7 +28,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
 
         private static PS CreatePowerShellWithCmdlets()
         {
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
@@ -48,7 +48,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_DeletesAlternateKey()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 
@@ -77,7 +77,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_PassesCorrectEntityName()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 
@@ -105,7 +105,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_PassesCorrectKeyName()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 
@@ -157,7 +157,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_WhatIf_DoesNotDelete()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 
@@ -185,7 +185,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_ConfirmFalse_ExecutesDelete()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 
@@ -215,7 +215,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseEntityKeyMetadata_AcceptsEntityNameFromPipeline()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseEntityKeyMetadata", typeof(Commands.RemoveDataverseEntityKeyMetadataCmdlet), null));
 

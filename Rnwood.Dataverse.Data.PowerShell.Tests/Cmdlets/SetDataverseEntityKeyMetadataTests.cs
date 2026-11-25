@@ -22,7 +22,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_EmptyKeyAttributes_ThrowsError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -74,7 +74,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_CreatesRequestWithCorrectEntityName()
         {
             // Arrange - TestBase has CreateEntityKeyRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -103,7 +103,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_CreatesEntityKeyMetadataWithCorrectSchemaName()
         {
             // Arrange - TestBase has CreateEntityKeyRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -132,7 +132,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_SetsKeyAttributesCorrectly()
         {
             // Arrange - TestBase has CreateEntityKeyRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -163,7 +163,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_WhatIf_DoesNotCreateKey()
         {
             // Arrange - TestBase has CreateEntityKeyRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 
@@ -195,7 +195,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseEntityKeyMetadata_Force_SkipsExistenceCheck()
         {
             // Arrange - TestBase has CreateEntityKeyRequest interceptor
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseEntityKeyMetadata", typeof(Commands.SetDataverseEntityKeyMetadataCmdlet), null));
 

@@ -28,7 +28,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_InsertStatement_CreatesRecord()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -75,7 +75,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_ParameterizedInsertStatement_CreatesRecordWithBoundParameters()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -130,7 +130,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_ParameterizedUpdateWithWhereClause_UpdatesSpecificRecord()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -183,7 +183,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_DataSourceNameOverride_AllowsSelectingFromNamedPrimaryDatasource()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -221,7 +221,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_AdditionalConnections_AllowsSelectingFromNamedAdditionalDatasource()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -265,7 +265,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_CrossDatasourceQueryWithAdditionalConnections_ReturnsResults()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -310,7 +310,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_AdditionalConnections_InvalidValueType_ThrowsHelpfulError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 
@@ -344,7 +344,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void InvokeDataverseSql_UnsupportedBuiltInFunction_WithoutTdsEndpoint_IncludesGuidance()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Invoke-DataverseSql", typeof(InvokeDataverseSqlCmdlet), null));
 

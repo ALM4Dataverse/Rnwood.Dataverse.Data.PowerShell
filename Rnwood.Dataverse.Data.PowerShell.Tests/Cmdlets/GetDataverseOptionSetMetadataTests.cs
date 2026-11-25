@@ -24,7 +24,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseOptionSetMetadata_ChoiceAttribute_ReturnsOptionSetWithOptions()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseOptionSetMetadata", typeof(Commands.GetDataverseOptionSetMetadataCmdlet), null));
 
@@ -64,7 +64,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseOptionSetMetadata_DefaultConnection_UsesDefaultConnection()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseOptionSetMetadata", typeof(Commands.GetDataverseOptionSetMetadataCmdlet), null));
 
@@ -104,7 +104,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseOptionSetMetadata_NonChoiceAttribute_ThrowsError()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseOptionSetMetadata", typeof(Commands.GetDataverseOptionSetMetadataCmdlet), null));
 
@@ -134,7 +134,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseOptionSetMetadata_DefaultBehavior_RetrievesUnpublishedMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseOptionSetMetadata", typeof(Commands.GetDataverseOptionSetMetadataCmdlet), null));
 
@@ -166,7 +166,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void GetDataverseOptionSetMetadata_PublishedFlag_RetrievesPublishedMetadata()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseOptionSetMetadata", typeof(Commands.GetDataverseOptionSetMetadataCmdlet), null));
 

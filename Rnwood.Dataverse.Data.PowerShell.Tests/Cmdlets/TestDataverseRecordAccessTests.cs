@@ -28,7 +28,7 @@ public class TestDataverseRecordAccessTests : TestBase, IDisposable
 
     private static PS CreatePowerShellWithCmdlets()
     {
-        var initialSessionState = InitialSessionState.CreateDefault();
+        var initialSessionState = InitialSessionState.CreateDefault2();
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(
             "Test-DataverseRecordAccess", typeof(TestDataverseRecordAccessCmdlet), null));
         initialSessionState.Commands.Add(new SessionStateCmdletEntry(

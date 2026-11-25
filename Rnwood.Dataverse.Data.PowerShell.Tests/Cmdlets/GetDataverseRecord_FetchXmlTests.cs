@@ -20,7 +20,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
     {
         private PS CreatePowerShellWithCmdlets()
         {
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Get-DataverseRecord", typeof(GetDataverseRecordCmdlet), null));
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(

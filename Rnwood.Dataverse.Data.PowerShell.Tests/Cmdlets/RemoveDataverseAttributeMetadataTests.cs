@@ -18,7 +18,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void RemoveDataverseAttributeMetadata_WhatIf_DoesNotThrow()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Remove-DataverseAttributeMetadata", typeof(Commands.RemoveDataverseAttributeMetadataCmdlet), null));
 

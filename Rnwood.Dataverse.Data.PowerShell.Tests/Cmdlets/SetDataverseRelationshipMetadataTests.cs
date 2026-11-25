@@ -20,7 +20,7 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Cmdlets
         public void SetDataverseRelationshipMetadata_CreateManyToMany_UsesIntersectEntitySchemaName()
         {
             // Arrange
-            var initialSessionState = InitialSessionState.CreateDefault();
+            var initialSessionState = InitialSessionState.CreateDefault2();
             initialSessionState.Commands.Add(new SessionStateCmdletEntry(
                 "Set-DataverseRelationshipMetadata", typeof(Commands.SetDataverseRelationshipMetadataCmdlet), null));
 
