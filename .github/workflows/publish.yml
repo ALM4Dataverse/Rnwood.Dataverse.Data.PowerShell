@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             powershell_version: "7.4.14"
             dotnet_tfm: "net8.0"
             test_set: e2e-minimal
@@ -34,7 +34,7 @@ jobs:
             powershell_version: '5'
             dotnet_tfm: "net462"
             test_set: e2e-minimal
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             powershell_version: "7.6.0"
             dotnet_tfm: "net10.0"
             test_set: e2e-minimal
@@ -42,7 +42,7 @@ jobs:
             powershell_version: "7.6.0"
             dotnet_tfm: "net10.0"
             test_set: e2e-minimal
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             powershell_version: "7.5.5"
             dotnet_tfm: "net9.0"
             test_set: e2e-minimal
