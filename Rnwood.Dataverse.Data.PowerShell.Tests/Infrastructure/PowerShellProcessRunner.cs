@@ -112,6 +112,19 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
                     StandardErrorEncoding = Encoding.UTF8
                 };
 
+                if (executable.Equals("powershell", StringComparison.OrdinalIgnoreCase) &&
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var inheritedModulePath = startInfo.EnvironmentVariables["PSModulePath"];
+                    if (!string.IsNullOrEmpty(inheritedModulePath))
+                    {
+                        startInfo.EnvironmentVariables["PSModulePath"] = string.Join(
+                            Path.PathSeparator.ToString(),
+                            inheritedModulePath.Split(Path.PathSeparator)
+                                .Where(path => !IsPowerShellCoreModulePath(path)));
+                    }
+                }
+
                 var stdout = new StringBuilder();
                 var stderr = new StringBuilder();
 
@@ -232,6 +245,24 @@ namespace Rnwood.Dataverse.Data.PowerShell.Tests.Infrastructure
             }
 
             return executable;
+        }
+
+        private static bool IsPowerShellCoreModulePath(string path)
+        {
+            var segments = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            for (var i = 0; i + 2 < segments.Length; i++)
+            {
+                if (segments[i].Equals("PowerShell", StringComparison.OrdinalIgnoreCase) &&
+                    (int.TryParse(segments[i + 1], out _) || Version.TryParse(segments[i + 1], out _)) &&
+                    segments[i + 2].Equals("Modules", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

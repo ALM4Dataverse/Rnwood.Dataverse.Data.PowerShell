@@ -13,10 +13,10 @@ Creates or updates Dataverse records including M:M association/disassociation, s
 ## SYNTAX
 
 ```
-Set-DataverseRecord -InputObject <PSObject> -TableName <String> [-BatchSize <UInt32>]
+Set-DataverseRecord -InputObject <PSObject> -TableName <String> [-BatchSize <UInt32>] [-UseExecuteMultiple]
  [-RetrievalBatchSize <UInt32>] [-IgnoreProperties <String[]>] [-Id <Guid>] [-MatchOn <String[][]>]
  [-AllowMultipleMatches] [-PassThru] [-NoUpdate] [-NoCreate] [-NoUpdateColumns <String[]>] [-CallerId <Guid>]
- [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-UseExecuteMultiple] [-LookupColumns <Hashtable>] [-NoLookup]
+ [-UpdateAllColumns] [-CreateOnly] [-Upsert] [-LookupColumns <Hashtable>] [-NoLookup]
  [-BypassBusinessLogicExecution <BusinessLogicTypes[]>] [-BypassBusinessLogicExecutionStepIds <Guid[]>]
  [-Retries <Int32>] [-InitialRetryDelay <Int32>] [-MaxDegreeOfParallelism <Int32>] [-EnableDuplicateDetection]
  [-FileDirectory <String>] [-Connection <ServiceClient>] [-ProgressAction <ActionPreference>] [-WhatIf]
@@ -556,21 +556,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UseExecuteMultiple
-If specified, uses the legacy `ExecuteMultipleRequest` batching behavior instead of the `CreateMultipleRequest`, `UpdateMultipleRequest`, and `UpsertMultipleRequest` messages.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -BypassBusinessLogicExecution
 Specifies the types of business logic (for example plugins) to bypass
 
@@ -990,6 +975,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseExecuteMultiple
+If specified, uses the legacy `ExecuteMultipleRequest` batching behavior instead of the `CreateMultipleRequest`, `UpdateMultipleRequest`, and `UpsertMultipleRequest` messages.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

@@ -54,8 +54,8 @@ Get-DataverseConnection [-SetAsDefault] [-Name <String>] [-ClientId <Guid>] [-Ur
 ### Authenticate with Web Account Manager (WAM)
 ```
 Get-DataverseConnection [-SetAsDefault] [-Name <String>] [-ClientId <Guid>] [-Url <Uri>] [-Username <String>]
- [-UseWAM] [-Timeout <UInt32>] [-TenantId <Guid>] [-DisableAffinityCookie]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-UseWAM] [-Timeout <UInt32>] [-TenantId <Guid>] [-DisableAffinityCookie] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ### Authenticate using the device code flow
@@ -626,21 +626,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UseWAM
-Authenticates interactively using Web Account Manager (WAM) on Windows.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: Authenticate with Web Account Manager (WAM)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -ListConnections
 Lists all saved named connections.
 
@@ -854,6 +839,21 @@ Parameter Sets: Authenticate interactively, Authenticate with Web Account Manage
 Aliases:
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseWAM
+Authenticates interactively using Web Account Manager (WAM) on Windows.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Authenticate with Web Account Manager (WAM)
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False

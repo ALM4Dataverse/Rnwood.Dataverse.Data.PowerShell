@@ -43,6 +43,14 @@ jobs:
             dotnet_tfm: "net10.0"
             test_set: e2e-minimal
           - os: ubuntu-24.04
+            powershell_version: "7.7.0"
+            dotnet_tfm: "net10.0"
+            test_set: e2e-minimal
+          - os: windows-latest
+            powershell_version: "7.7.0"
+            dotnet_tfm: "net10.0"
+            test_set: e2e-minimal
+          - os: ubuntu-24.04
             powershell_version: "7.5.5"
             dotnet_tfm: "net9.0"
             test_set: e2e-minimal
@@ -64,6 +72,30 @@ jobs:
         uses: PSModule/install-powershell@159c2929fac34e3c7fc55d75e8997fb27fc7f75a # v1
         with:
           Version: ${{ matrix.powershell_version }}
+      - name: Install common modules for module load-order tests
+        shell: pwsh
+        run: |
+          $modulePath = Join-Path $env:RUNNER_TEMP "InteropModules"
+          New-Item -ItemType Directory -Force -Path $modulePath | Out-Null
+
+          Save-Module -Name Az.Accounts -RequiredVersion 5.5.0 -Path $modulePath -Force
+          Save-Module -Name Az.Resources -RequiredVersion 9.1.0 -Path $modulePath -Force
+
+          # Saving Az.Resources also saves a newer Az.Accounts dependency. Keep only the
+          # explicitly tested version so unqualified dependency discovery cannot select it.
+          Get-ChildItem (Join-Path $modulePath "Az.Accounts") -Directory |
+            Where-Object { $_.Name -ne "5.5.0" } |
+            Remove-Item -Recurse -Force
+
+          if ("${{ matrix.powershell_version }}" -eq "5") {
+            Save-Module -Name Microsoft.Online.SharePoint.PowerShell -RequiredVersion 16.0.27814.12015 -Path $modulePath -Force
+          }
+          else {
+            Save-Module -Name PnP.PowerShell -RequiredVersion 3.5.0 -Path $modulePath -Force
+          }
+
+          $env:PSModulePath = "$modulePath$([IO.Path]::PathSeparator)$env:PSModulePath"
+          Add-Content -Path $env:GITHUB_ENV -Value "PSModulePath=$env:PSModulePath"
       - if: ${{ matrix.test_set == 'e2e-minimal' || matrix.test_set == 'e2e-full' }}
         name: Install Azure Functions Core Tools (for AzureFunctionsCompatibilityTests)
         shell: bash

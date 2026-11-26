@@ -76,6 +76,12 @@ namespace Rnwood.Dataverse.Data.PowerShell.FrameworkSpecific.Loader
                     if (assemblyName.Version == null ||
                         (Version.TryParse(productVersionStr, out var parsedVersion) && parsedVersion >= assemblyName.Version))
                     {
+                        if (assemblyName.Name.StartsWith("Microsoft.Extensions.", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Load the bundled fallback directly after the default context failed to resolve it.
+                            return alc.LoadFromAssemblyPath(path);
+                        }
+
                         return alc.LoadFromAssemblyName(assemblyName);
                     }
                 }
@@ -176,6 +182,15 @@ namespace Rnwood.Dataverse.Data.PowerShell.FrameworkSpecific.Loader
                 // Returning null here makes CmdletsLoadContext fall back to that DEFAULT ALC copy, ensuring
                 // ServiceClient and PS scripts share the same type identity (one copy, no ALC duplication).
                 if (assemblyName.Name != null && assemblyName.Name.Equals("Microsoft.Crm.Sdk.Proxy", StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                // ILogger is part of the cmdlet-facing API, so keep its type identity shared
+                // with the default context. Other Microsoft.Extensions assemblies are client
+                // implementation dependencies and must use the versions bundled with Dataverse;
+                // host modules may have loaded incompatible versions into the default context.
+                if (string.Equals(assemblyName.Name, "Microsoft.Extensions.Logging.Abstractions", StringComparison.OrdinalIgnoreCase))
                 {
                     return null;
                 }
