@@ -16,10 +16,10 @@ jobs:
     timeout-minutes: 30
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       
       - name: Install PowerShell 7
-        uses: PSModule/install-powershell@v1
+        uses: PSModule/install-powershell@159c2929fac34e3c7fc55d75e8997fb27fc7f75a # v1
         with:
           Version: latest
       
@@ -45,7 +45,7 @@ jobs:
       
       - name: Notify on failure
         if: failure()
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             github.rest.issues.create({

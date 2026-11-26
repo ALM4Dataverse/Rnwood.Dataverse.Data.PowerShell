@@ -9,6 +9,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     timeout-minutes: 60  # Fail fast if job exceeds 60 minutes
@@ -39,7 +42,7 @@ jobs:
             powershell_version: "7.6.0"
             dotnet_tfm: "net10.0"
             test_set: e2e-minimal
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             powershell_version: "7.7.0"
             dotnet_tfm: "net10.0"
             test_set: e2e-minimal
@@ -60,13 +63,13 @@ jobs:
     name: Test (${{ matrix.test_set }}, ${{ matrix.os }}, PS ${{ matrix.powershell_version }})
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0  # Fetch all history for tags
           submodules: recursive  # Initialize and update submodules
       - if: ${{ matrix.powershell_version != '5' }}
         name: Install PowerShell ${{ matrix.powershell_version }}
-        uses: PSModule/install-powershell@v1
+        uses: PSModule/install-powershell@159c2929fac34e3c7fc55d75e8997fb27fc7f75a # v1
         with:
           Version: ${{ matrix.powershell_version }}
       - name: Install common modules for module load-order tests
@@ -96,7 +99,7 @@ jobs:
       - if: ${{ matrix.test_set == 'e2e-minimal' || matrix.test_set == 'e2e-full' }}
         name: Install Azure Functions Core Tools (for AzureFunctionsCompatibilityTests)
         shell: bash
-        run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
+        run: npm install -g azure-functions-core-tools@4.17.0 --unsafe-perm true
       - name: Build
         shell: pwsh
         run: |       
@@ -575,7 +578,7 @@ jobs:
       
       # Publish xUnit test results to GitHub
       - name: Publish Infrastructure Test Results
-        uses: dorny/test-reporter@v3
+        uses: dorny/test-reporter@2bf7bc7bba0f63da7f183274c61b24c27fb03989 # v3
         if: ${{ always() && steps.run-tests.outputs.infra_tests_executed == 'true' }}
         with:
           name: Infrastructure Tests (${{ matrix.test_set }}, ${{ matrix.os }}, PS ${{ matrix.powershell_version }})
@@ -585,7 +588,7 @@ jobs:
       
       # Publish E2E test results to GitHub
       - name: Publish E2E Test Results
-        uses: dorny/test-reporter@v3
+        uses: dorny/test-reporter@2bf7bc7bba0f63da7f183274c61b24c27fb03989 # v3
         if: ${{ always() && steps.run-tests.outputs.e2e_tests_executed == 'true' }}
         with:
           name: E2E Tests (${{ matrix.test_set }}, ${{ matrix.os }}, PS ${{ matrix.powershell_version }})
@@ -595,7 +598,7 @@ jobs:
       
       # Upload artifacts needed for publishing
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: module-${{ matrix.test_set }}-${{ matrix.os }}-${{ matrix.powershell_version }}
           path: |
@@ -610,7 +613,7 @@ jobs:
       # Upload test failure reports as artifacts
       - name: Upload test failure report
         if: failure() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: test-failures-${{ matrix.test_set }}-${{ matrix.os }}-${{ matrix.powershell_version }}
           path: test-failures-*.md
@@ -619,7 +622,7 @@ jobs:
       # Comment on PR with test failures
       - name: Comment on PR with test failures
         if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             const fs = require('fs');
@@ -660,13 +663,18 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
+      attestations: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
+
+      - name: Install NuGet CLI
+        uses: NuGet/setup-nuget@d105a947828025cd7a980103c35ba2bfae586d0f # v2
       
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: module-e2e-minimal-windows-latest-5
           path: .
@@ -696,9 +704,24 @@ jobs:
           }
           
           $content | Set-Content -Path $manifestPath -Encoding UTF8
+          $version = (Import-PowerShellDataFile -Path $manifestPath).ModuleVersion
           
-          # Publish stable release to PowerShell Gallery
-          Publish-Module -Path out/Rnwood.Dataverse.Data.PowerShell -NuGetApiKey $env:NUGET_KEY -Verbose
+          # Package and publish the exact module bytes that will be attested.
+          $modulePackageDirectory = "out/module-package"
+          New-Item -ItemType Directory -Path $modulePackageDirectory -Force | Out-Null
+          nuget pack Rnwood.Dataverse.Data.PowerShell.nuspec `
+            -Version $version `
+            -OutputDirectory $modulePackageDirectory `
+            -NoPackageAnalysis
+          $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
+          if (-not $modulePackage) {
+              Write-Error "No module package was created"
+              exit 1
+          }
+          nuget push $modulePackage.FullName `
+            -ApiKey $env:NUGET_KEY `
+            -Source https://www.powershellgallery.com/api/v2/ `
+            -SkipDuplicate
 
           # Publish XrmToolbox Plugin to NuGet (if package exists)
           $nupkgFiles = Get-ChildItem -Path 'out/nuget/*.nupkg' -ErrorAction SilentlyContinue
@@ -711,9 +734,17 @@ jobs:
           } else {
               Write-Warning "No XrmToolbox Plugin nupkg found in out/nuget/ - skipping NuGet publish"
           }
+
+      - name: Attest release packages
+        if: ${{ hashFiles('out/nuget/*.nupkg', 'out/module-package/*.nupkg') != '' }}
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: |
+            out/nuget/*.nupkg
+            out/module-package/*.nupkg
       
       - name: Update GitHub Release Description
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             const fs = require('fs');
@@ -764,13 +795,18 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
+      attestations: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
+
+      - name: Install NuGet CLI
+        uses: NuGet/setup-nuget@d105a947828025cd7a980103c35ba2bfae586d0f # v2
       
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: module-e2e-minimal-windows-latest-5
           path: .
@@ -780,9 +816,14 @@ jobs:
         run: |
           # Create a zip file of the module
           Compress-Archive -Path out/Rnwood.Dataverse.Data.PowerShell -DestinationPath Rnwood.Dataverse.Data.PowerShell-CI.zip -Force
+
+      - name: Attest CI build artifact
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: Rnwood.Dataverse.Data.PowerShell-CI.zip
       
       - name: Create GitHub Release for CI Build
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             const fs = require('fs');
@@ -912,9 +953,31 @@ jobs:
           }
           
           $content | Set-Content -Path $manifestPath -Encoding UTF8
+          $version = Get-Content -Path "ci-version.txt" -Raw
+          $version = $version.Trim()
           
-          # Publish prerelease to PowerShell Gallery
-          Publish-Module -Path out/Rnwood.Dataverse.Data.PowerShell -NuGetApiKey $env:NUGET_KEY -Verbose
+          # Package and publish the exact module bytes that will be attested.
+          $modulePackageDirectory = "out/module-package"
+          New-Item -ItemType Directory -Path $modulePackageDirectory -Force | Out-Null
+          nuget pack Rnwood.Dataverse.Data.PowerShell.nuspec `
+            -Version $version `
+            -OutputDirectory $modulePackageDirectory `
+            -NoPackageAnalysis
+          $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
+          if (-not $modulePackage) {
+              Write-Error "No module package was created"
+              exit 1
+          }
+          nuget push $modulePackage.FullName `
+            -ApiKey $env:NUGET_KEY `
+            -Source https://www.powershellgallery.com/api/v2/ `
+            -SkipDuplicate
+
+      - name: Attest CI module package
+        if: ${{ hashFiles('out/module-package/*.nupkg') != '' }}
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: out/module-package/*.nupkg
 
           # NOTE: XrmToolbox Plugin is NOT published to NuGet from CI builds
           # Only release builds (publish job) should push to NuGet to avoid 
