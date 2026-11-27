@@ -704,7 +704,17 @@ jobs:
           }
           
           $content | Set-Content -Path $manifestPath -Encoding UTF8
-          $version = (Import-PowerShellDataFile -Path $manifestPath).ModuleVersion
+          # The manifest contains a dynamic NestedModules expression, which
+          # Import-PowerShellDataFile intentionally refuses to evaluate.
+          $versionMatch = [regex]::Match(
+            $content,
+            '(?m)^\s*ModuleVersion\s*=\s*[''"]([^''"]+)[''"]'
+          )
+          if (-not $versionMatch.Success) {
+            Write-Error "ModuleVersion was not found in $manifestPath"
+            exit 1
+          }
+          $version = $versionMatch.Groups[1].Value
           
           # Package and publish the exact module bytes that will be attested.
           $modulePackageDirectory = "out/module-package"
