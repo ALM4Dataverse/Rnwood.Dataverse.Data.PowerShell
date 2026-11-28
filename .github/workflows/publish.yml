@@ -722,6 +722,10 @@ jobs:
             exit 1
           }
           $version = $versionMatch.Groups[1].Value
+          $manifest = Test-ModuleManifest -Path $manifestPath -ErrorAction Stop
+          if ($manifest.Version.ToString() -ne $version) {
+              throw "Module manifest version $($manifest.Version) does not match package version $version"
+          }
           
           # Package and publish the exact module bytes that will be attested.
           $modulePackageDirectory = "out/module-package"
@@ -730,15 +734,33 @@ jobs:
             -Version $version `
             -OutputDirectory $modulePackageDirectory `
             -NoPackageAnalysis
+          if ($LASTEXITCODE -ne 0) {
+              throw "NuGet package creation failed with exit code $LASTEXITCODE"
+          }
           $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
           if (-not $modulePackage) {
               Write-Error "No module package was created"
               exit 1
           }
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($modulePackage.FullName)
+          try {
+              $manifestEntry = $archive.Entries | Where-Object {
+                  $_.FullName -eq "Rnwood.Dataverse.Data.PowerShell.psd1"
+              }
+              if (-not $manifestEntry) {
+                  throw "Module package does not contain its manifest at the package root"
+              }
+          } finally {
+              $archive.Dispose()
+          }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
             -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
+          if ($LASTEXITCODE -ne 0) {
+              throw "PowerShell Gallery publish failed with exit code $LASTEXITCODE"
+          }
 
           # Publish XrmToolbox Plugin to NuGet (if package exists)
           $nupkgFiles = Get-ChildItem -Path 'out/nuget/*.nupkg' -ErrorAction SilentlyContinue
@@ -747,6 +769,9 @@ jobs:
               foreach ($nupkg in $nupkgFiles) {
                   Write-Host "  Pushing $($nupkg.FullName)..."
                   dotnet nuget push $nupkg.FullName -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+                  if ($LASTEXITCODE -ne 0) {
+                      throw "NuGet publish failed for $($nupkg.Name) with exit code $LASTEXITCODE"
+                  }
               }
           } else {
               Write-Warning "No XrmToolbox Plugin nupkg found in out/nuget/ - skipping NuGet publish"
@@ -971,6 +996,7 @@ jobs:
           $content | Set-Content -Path $manifestPath -Encoding UTF8
           $version = Get-Content -Path "ci-version.txt" -Raw
           $version = $version.Trim()
+          Test-ModuleManifest -Path $manifestPath -ErrorAction Stop | Out-Null
           
           # Package and publish the exact module bytes that will be attested.
           $modulePackageDirectory = "out/module-package"
@@ -979,15 +1005,33 @@ jobs:
             -Version $version `
             -OutputDirectory $modulePackageDirectory `
             -NoPackageAnalysis
+          if ($LASTEXITCODE -ne 0) {
+              throw "NuGet package creation failed with exit code $LASTEXITCODE"
+          }
           $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
           if (-not $modulePackage) {
               Write-Error "No module package was created"
               exit 1
           }
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($modulePackage.FullName)
+          try {
+              $manifestEntry = $archive.Entries | Where-Object {
+                  $_.FullName -eq "Rnwood.Dataverse.Data.PowerShell.psd1"
+              }
+              if (-not $manifestEntry) {
+                  throw "Module package does not contain its manifest at the package root"
+              }
+          } finally {
+              $archive.Dispose()
+          }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
             -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
+          if ($LASTEXITCODE -ne 0) {
+              throw "PowerShell Gallery publish failed with exit code $LASTEXITCODE"
+          }
 
       - name: Attest CI module package
         if: ${{ hashFiles('out/module-package/*.nupkg') != '' }}

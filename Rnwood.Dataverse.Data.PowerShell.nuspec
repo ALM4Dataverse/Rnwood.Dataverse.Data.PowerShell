@@ -3,13 +3,15 @@
   <metadata minClientVersion="4.0">
     <id>Rnwood.Dataverse.Data.PowerShell</id>
     <version>$version$</version>
-    <authors>Rob Wood</authors>
+    <authors>Rob Wood &lt;rob@rnwood.co.uk&gt;</authors>
     <owners>Rob Wood</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/rnwood/Rnwood.Dataverse.Data.PowerShell/blob/main/LICENSE</licenseUrl>
     <description>Dataverse data manipulation cmdlets</description>
     <projectUrl>https://github.com/rnwood/Rnwood.Dataverse.Data.PowerShell</projectUrl>
-    <license type="expression">MIT</license>
-    <tags>PowerShell Dataverse Dynamics 365</tags>
+    <iconUrl>https://raw.githubusercontent.com/rnwood/Rnwood.Dataverse.Data.PowerShell/main/icon.png</iconUrl>
+    <copyright>(c) 2024-2026 Robert Wood and project contributors. See licence.</copyright>
+    <tags>PSModule PowerShell Dataverse Dynamics 365</tags>
   </metadata>
   <files>
     <file src="out/Rnwood.Dataverse.Data.PowerShell/**/*" target="." />
