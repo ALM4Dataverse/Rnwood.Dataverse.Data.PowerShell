@@ -14,6 +14,6 @@
     <tags>PSModule PowerShell Dataverse Dynamics 365</tags>
   </metadata>
   <files>
-    <file src="out/Rnwood.Dataverse.Data.PowerShell/**/*" target="." />
+    <file src="out\Rnwood.Dataverse.Data.PowerShell\**\*" target="" />
   </files>
 </package>
