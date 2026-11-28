@@ -661,6 +661,7 @@ jobs:
     needs: test
     if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: windows-latest
+    environment: production
     permissions:
       contents: write
       attestations: write
@@ -672,6 +673,12 @@ jobs:
 
       - name: Install NuGet CLI
         uses: NuGet/setup-nuget@d105a947828025cd7a980103c35ba2bfae586d0f # v2
+
+      - name: Log in to NuGet with Trusted Publishing
+        id: nuget-login
+        uses: NuGet/login@ebc737b6fc418a6ca0073cf116ec8dc156d8b81e # v1
+        with:
+          user: rnwood
       
       - name: Download build artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -682,7 +689,7 @@ jobs:
       - name: Publish to PS Gallery and Nuget (XrmToolbox Plugin)
         env:
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
-          NUGET_KEY_XRMTOOLBOX: ${{ secrets.NUGET_KEY_XRMTOOLBOX }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         shell: pwsh
         run: |
           # Add release notes to module manifest
@@ -730,7 +737,7 @@ jobs:
           }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
-            -Source https://www.powershellgallery.com/api/v2/ `
+            -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
 
           # Publish XrmToolbox Plugin to NuGet (if package exists)
@@ -739,7 +746,7 @@ jobs:
               Write-Host "Publishing XrmToolbox Plugin to NuGet..."
               foreach ($nupkg in $nupkgFiles) {
                   Write-Host "  Pushing $($nupkg.FullName)..."
-                  dotnet nuget push $nupkg.FullName -k $env:NUGET_KEY_XRMTOOLBOX -s https://api.nuget.org/v3/index.json --skip-duplicate
+                  dotnet nuget push $nupkg.FullName -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
               }
           } else {
               Write-Warning "No XrmToolbox Plugin nupkg found in out/nuget/ - skipping NuGet publish"
@@ -941,7 +948,6 @@ jobs:
       - name: Publish CI Build to PowerShell Gallery
         env:
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
-          NUGET_KEY_XRMTOOLBOX: ${{ secrets.NUGET_KEY_XRMTOOLBOX }}
         shell: pwsh
         run: |
           # Add release notes to module manifest
@@ -980,7 +986,7 @@ jobs:
           }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
-            -Source https://www.powershellgallery.com/api/v2/ `
+            -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
 
       - name: Attest CI module package
