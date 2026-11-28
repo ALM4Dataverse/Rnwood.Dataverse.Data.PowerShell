@@ -722,6 +722,10 @@ jobs:
             exit 1
           }
           $version = $versionMatch.Groups[1].Value
+          $manifest = Test-ModuleManifest -Path $manifestPath -ErrorAction Stop
+          if ($manifest.Version.ToString() -ne $version) {
+              throw "Module manifest version $($manifest.Version) does not match package version $version"
+          }
           
           # Package and publish the exact module bytes that will be attested.
           $modulePackageDirectory = "out/module-package"
@@ -737,6 +741,18 @@ jobs:
           if (-not $modulePackage) {
               Write-Error "No module package was created"
               exit 1
+          }
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($modulePackage.FullName)
+          try {
+              $manifestEntry = $archive.Entries | Where-Object {
+                  $_.FullName -eq "Rnwood.Dataverse.Data.PowerShell.psd1"
+              }
+              if (-not $manifestEntry) {
+                  throw "Module package does not contain its manifest at the package root"
+              }
+          } finally {
+              $archive.Dispose()
           }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
@@ -980,6 +996,7 @@ jobs:
           $content | Set-Content -Path $manifestPath -Encoding UTF8
           $version = Get-Content -Path "ci-version.txt" -Raw
           $version = $version.Trim()
+          Test-ModuleManifest -Path $manifestPath -ErrorAction Stop | Out-Null
           
           # Package and publish the exact module bytes that will be attested.
           $modulePackageDirectory = "out/module-package"
@@ -995,6 +1012,18 @@ jobs:
           if (-not $modulePackage) {
               Write-Error "No module package was created"
               exit 1
+          }
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($modulePackage.FullName)
+          try {
+              $manifestEntry = $archive.Entries | Where-Object {
+                  $_.FullName -eq "Rnwood.Dataverse.Data.PowerShell.psd1"
+              }
+              if (-not $manifestEntry) {
+                  throw "Module package does not contain its manifest at the package root"
+              }
+          } finally {
+              $archive.Dispose()
           }
           nuget push $modulePackage.FullName `
             -ApiKey $env:NUGET_KEY `
