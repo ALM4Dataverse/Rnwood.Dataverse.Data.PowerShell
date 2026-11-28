@@ -730,6 +730,9 @@ jobs:
             -Version $version `
             -OutputDirectory $modulePackageDirectory `
             -NoPackageAnalysis
+          if ($LASTEXITCODE -ne 0) {
+              throw "NuGet package creation failed with exit code $LASTEXITCODE"
+          }
           $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
           if (-not $modulePackage) {
               Write-Error "No module package was created"
@@ -739,6 +742,9 @@ jobs:
             -ApiKey $env:NUGET_KEY `
             -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
+          if ($LASTEXITCODE -ne 0) {
+              throw "PowerShell Gallery publish failed with exit code $LASTEXITCODE"
+          }
 
           # Publish XrmToolbox Plugin to NuGet (if package exists)
           $nupkgFiles = Get-ChildItem -Path 'out/nuget/*.nupkg' -ErrorAction SilentlyContinue
@@ -747,6 +753,9 @@ jobs:
               foreach ($nupkg in $nupkgFiles) {
                   Write-Host "  Pushing $($nupkg.FullName)..."
                   dotnet nuget push $nupkg.FullName -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+                  if ($LASTEXITCODE -ne 0) {
+                      throw "NuGet publish failed for $($nupkg.Name) with exit code $LASTEXITCODE"
+                  }
               }
           } else {
               Write-Warning "No XrmToolbox Plugin nupkg found in out/nuget/ - skipping NuGet publish"
@@ -979,6 +988,9 @@ jobs:
             -Version $version `
             -OutputDirectory $modulePackageDirectory `
             -NoPackageAnalysis
+          if ($LASTEXITCODE -ne 0) {
+              throw "NuGet package creation failed with exit code $LASTEXITCODE"
+          }
           $modulePackage = Get-ChildItem -Path "$modulePackageDirectory/*.nupkg" | Select-Object -First 1
           if (-not $modulePackage) {
               Write-Error "No module package was created"
@@ -988,6 +1000,9 @@ jobs:
             -ApiKey $env:NUGET_KEY `
             -Source https://www.powershellgallery.com/api/v2/package `
             -SkipDuplicate
+          if ($LASTEXITCODE -ne 0) {
+              throw "PowerShell Gallery publish failed with exit code $LASTEXITCODE"
+          }
 
       - name: Attest CI module package
         if: ${{ hashFiles('out/module-package/*.nupkg') != '' }}
